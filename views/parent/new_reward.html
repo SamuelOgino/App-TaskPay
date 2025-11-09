@@ -1,0 +1,43 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>TaskPay • Nova Recompensa</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/new_reward.css') }}">
+  <link rel="manifest" href="/manifest.json">
+
+</head>
+<body>
+  <div class="phone">
+    <header class="app-header">
+      <a href="{{ url_for('parent.rewards_page') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="logo"><i class="fa-solid fa-list"></i><span>TaskPay</span></div>
+      <!-- <i class="fa-solid fa-user"></i> -->
+    </header>
+
+    <main class="content-area">
+      {{ flash_messages() }}
+      <h2 style="font-weight:800;font-size:1.4rem;margin-bottom:12px">Nova Recompensa</h2>
+
+      <form method="post" action="{{ url_for('parent.create_reward') }}">
+        <div class="card">
+          <label>Título</label>
+          <input class="input" type="text" name="titulo" placeholder="Ex.: 1h de videogame" required>
+
+          <label>Descrição</label>
+          <textarea name="descricao" placeholder="Detalhes da recompensa (opcional)"></textarea>
+
+          <label>Custo em XP</label>
+          <input class="input" type="number" name="custoXP" min="0" step="1" value="0">
+        </div>
+
+        <button class="btn primary" type="submit">Salvar Recompensa</button>
+      </form>
+    </main>
+  </div>
+</body>
+</html>

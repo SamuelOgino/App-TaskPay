@@ -1,0 +1,113 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Editar Perfil</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_parent.css') }}">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+
+    <div class="phone">
+
+        <header class="app-header">
+            <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>Editar Perfil</span>
+            </div>
+             <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-user"></i></a>
+        </header>
+
+        <main class="content-area">
+            
+            {{ flash_messages() }}
+
+            <form 
+                method="post" 
+                action="{{ url_for('parent.edit_profile_submit') }}" 
+                enctype="multipart/form-data"
+                class="edit-profile-form"
+            >
+                
+                <div class="card edit-pic-preview">
+                    <img 
+                        src="{{ url_for('static', filename=membro.usuario.avatarUrl) if membro.usuario.avatarUrl else 'https://via.placeholder.com/120' }}" 
+                        alt="Foto do Perfil" 
+                        class="profile-pic"
+                        id="image-preview" >
+                    <span class="pic-label">Sua foto de perfil atual</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="nome">Nome de utilizador</label>
+                    <input type="text" id="nome" name="nome" value="{{ membro.usuario.nome }}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="foto_perfil">Alterar foto de perfil</label>
+                    
+                    <input type="file" id="foto_perfil" name="foto_perfil" class="form-control" accept="image/png, image/jpeg, image/webp">
+                    
+                    <label for="foto_perfil" class="file-upload-label">
+                        <i class="fa-solid fa-upload"></i>
+                        Escolher arquivo
+                    </label>
+                    
+                    <p class="form-help-text">Apenas ficheiros .JPG, .PNG ou .WEBP.</p>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-salvar">Salvar Alterações</button>
+                </div>
+            
+            </form>
+        </main>
+
+        <footer class="app-footer-nav">
+            <a href="{{ url_for('parent.home') }}" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tarefas</span>
+            </a>
+            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            <a href="{{ url_for('parent.profile_page') }}" class="nav-item active">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const fileInput = document.getElementById("foto_perfil");
+            const imagePreview = document.getElementById("image-preview");
+            
+            if (fileInput && imagePreview) {
+                fileInput.addEventListener("change", function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            imagePreview.src = event.target.result;
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

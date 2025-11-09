@@ -1,0 +1,107 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskPay • Recompensas</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/rewards_parent.css') }}">
+  <link rel="manifest" href="/manifest.json">
+  
+</head>
+<body>
+  <div class="phone">
+    <header class="app-header">
+      {{ flash_messages() }}
+      <a href="{{ url_for('parent.home') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="logo"><i class="fa-solid fa-list"></i><span>TaskPay</span></div>
+      
+      <!-- <a href="#"><i class="fa-solid fa-user"></i></a> -->
+      
+    </header>
+
+    <main class="content-area">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h2 class="section-title">Recompensas</h2>
+        <a class="btn green" href="{{ url_for('parent.new_reward_page') }}"><i class="fa-solid fa-plus"></i> Nova Recompensa</a>
+      </div>
+
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px">Resumo de XP</h3>
+        <div class="grid-two">
+          {% for k in xp_por_filho %}
+            <div class="kid-card">
+              
+              <img src="{{ url_for('static', filename='uploads/' + k.avatar) if k.avatar else 'https://via.placeholder.com/64' }}" alt="{{k.nome}}">
+              
+              <div style="flex:1">
+                <div style="font-weight:700">{{ k.nome }}</div>
+                <div class="xp"><i class="fa-solid fa-star"></i> {{ k.xp }} XP</div>
+              </div>
+            </div>
+          {% else %}
+            <p style="color:var(--muted)">Sem filhos cadastrados nesta família.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px">Recompensas Ativas</h3>
+        {% for r in ativas %}
+          <div class="reward-item">
+            <div>
+              <div class="title">{{ r.titulo }}</div>
+              <div class="cost">{{ r.custoXP }} XP</div>
+            </div>
+            <a class="link" href="#">Detalhes</a>
+          </div>
+        {% else %}
+          <div class="reward-item">
+            <div>Sem recompensas ativas</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px">Recompensas Resgatadas</h3>
+        {% for h in historico %}
+          <div class="reward-item">
+            <div>
+              <div class="title">{{ h.recompensa.titulo if h.recompensa else 'Recompensa' }}</div>
+              <div class="cost">Resgatado por {{ h.membro.usuario.nome }} • {{ h.xpPago }} XP</div>
+            </div>
+            <span class="badge">{{ h.status }}</span>
+          </div>
+        {% else %}
+          <div class="reward-item">
+            <div>Sem resgates no histórico</div>
+          </div>
+        {% endfor %}
+      </div>
+    </main>
+
+    <footer class="app-footer-nav">
+          <a href="{{ url_for('parent.home') }}" class="nav-item"> 
+            <i class="fa-solid fa-house"></i>
+              <span>Início</span>
+          </a>
+          <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+              <i class="fa-solid fa-list-check"></i>
+              <span>Tarefas</span>
+          </a>
+          <a href="{{ url_for('parent.rewards_page') }}" class="nav-item active">
+              <i class="fa-solid fa-gift"></i>
+              <span>Recompensas</span>
+          </a>
+          <a href="{{ url_for('parent.profile_page') }}" class="nav-item">
+              <i class="fa-solid fa-user"></i>
+              <span>Perfil</span>
+          </a>
+      </footer>
+      <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+  </div>
+</body>
+</html>

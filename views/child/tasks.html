@@ -1,0 +1,128 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Minhas Tarefas</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/child_tasks.css') }}">
+    <link rel="manifest" href="/manifest.json">
+    
+</head>
+<body>
+
+    <div class="phone">
+
+        <header class="app-header">
+             {{ flash_messages() }}
+            <a href="{{ url_for('child.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>TaskPay</span>
+            </div>
+        </header>
+
+        <main class="content-area">
+            
+           
+            <h2 class="section-title">Tarefas Pendentes</h2>
+            <p class="section-subtitle">Complete as tarefas para ganhar sua recompensa!</p>
+
+            {% for tarefa in tarefas_pendentes %}
+                
+                <div class="task-card-new" data-priority="{{ tarefa.prioridade|default('BAIXA')|lower }}" id="tarefa-{{ tarefa.id }}">
+                    
+                    <div class="task-sidebar"></div>
+                    
+                    <div class="task-main">
+                        <div class="task-content">
+                            <h3>{{ tarefa.titulo }}</h3>
+                            <p>{{ tarefa.descricao }}</p>
+                            
+                            <div class="task-value">
+                                <i class="fa-solid fa-coins"></i>
+                                <span>R$ {{ "%.2f"|format(tarefa.valorBase|float) }}</span>
+                            </div>
+
+                            <button type="button" class="btn btn-concluir btn-toggle" data-target="form-{{ tarefa.id }}">
+                                Concluir
+                            </button>
+
+                            <div class="submission-form-container" id="form-{{ tarefa.id }}">
+                                <div class="submission-actions">
+                                    {% if tarefa.exigeFoto %}
+                                        <form action="{{ url_for('child.submit_task_photo', tarefa_id=tarefa.id) }}" 
+                                              method="POST" 
+                                              enctype="multipart/form-data" 
+                                              class="form-send-photo full-width">
+                                              
+                                            <input type="file" 
+                                                   name="foto_tarefa" 
+                                                   id="foto-{{ tarefa.id }}" 
+                                                   class="file-input" 
+                                                   accept="image/*" 
+                                                   required>
+                                            
+                                            <label for="foto-{{ tarefa.id }}" class="btn btn-primary">
+                                                <i class="fa-solid fa-camera"></i> Enviar foto
+                                            </label>
+
+                                            <button type="submit" class="submit-button" style="display: none;">Enviar</button>
+                                            
+                                        </form>
+                                    {% else %}
+                                        <form action="{{ url_for('child.submit_task_simple', tarefa_id=tarefa.id) }}" method="POST" class="form-mark-done full-width">
+                                            <button type="submit" class="btn btn-success">
+                                                Marcar como feito
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                <span class="btn-cancel">Cancelar</span>
+                            </div>
+                        </div> 
+                        
+                        <div class="task-icon-container">
+                            <i class="fa-solid {{ tarefa.icone or 'fa-list-check' }} task-icon"></i>
+                        </div>
+                    </div>
+                    </div>
+            {% else %}
+                <div class="card empty-state">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <p>Tudo em dia! Nenhuma tarefa pendente.</p>
+                </div>
+            {% endfor %}
+
+        </main>
+
+        <footer class="app-footer-nav">
+            <a href="{{ url_for('child.home') }}" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            
+            <a href="{{ url_for('child.tasks_page') }}" class="nav-item active"> 
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tarefas</span>
+            </a>
+            
+            <a href="#" class="nav-item"> 
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            
+            <a href="{{ url_for('child.profile_page') }}" class="nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+
+
+
+        <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/task_toggle.js') }}"></script>
+    </div> </body>
+</html>

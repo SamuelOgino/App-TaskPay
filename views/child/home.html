@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Início (Filho)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_child.css') }}">
+    <link rel="manifest" href="/manifest.json">
+    
+</head>
+<body>
+
+    <div class="phone">
+
+        <header class="app-header">
+            <a href="{{ url_for('auth.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>TaskPay</span>
+            </div>
+            <!-- <i class="fa-solid fa-user"></i> -->
+        </header>
+
+        <main class="content-area">
+
+            <h2 class="page-title">Início</h2> 
+            
+            <div class="card xp-card">
+                <div class="xp-info">
+                    <div class="xp-label">XP: <strong>{{ current_xp }}/{{ max_xp }}</strong></div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-inner" style="width: {{ xp_percent }}%;"></div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-fire-flame-curved flame-icon"></i>
+            </div>
+            
+            <div class="card balance-card">
+                <div class="balance-header">
+                    <div>
+                        <h3 class="title">Saldo da Mesada</h3>
+                    </div>
+                    
+                    <div class="balance-amount">
+                        R$ {{ "%.2f"|format(saldo_atual|float) }}
+                    </div>
+                </div>
+                <ul class="balance-details">
+                    <li>Tarefas concluídas: <span>+ R$ {{ "%.2f"|format(saldo_atual|float) }}</span></li>
+                    
+                    <li>Tarefas rejeitadas: <span>- R$ {{ "%.2f"|format(soma_rejeitadas|float) }}</span></li>
+                    
+                    <li>Recompensas resgatadas: <span>- {{ soma_xp_gasto }} XP</span></li>
+                </ul>
+            </div>
+            
+
+            <section class="task-section">
+                <h3 class="section-title">Tarefas Pendentes</h3>
+
+                {% if tarefas_pendentes %}
+                    {% for tarefa in tarefas_pendentes %}
+
+                        <a href="{{ url_for('child.tasks_page', _anchor='tarefa-' + tarefa.id) }}" class="card task-card
+                            {% if tarefa.prioridade == 'ALTA' %}
+                                priority-ALTA
+                            {% elif tarefa.prioridade == 'MEDIA' %}
+                                priority-MEDIA
+                            {% elif tarefa.prioridade == 'BAIXA' %}
+                                priority-BAIXA
+                            {% endif %}
+                        ">
+
+                            <i class="fa-solid {{ tarefa.icone or 'fa-list-check' }} task-icon"></i>
+
+                            <div class="task-info">
+                                <div class="task-title">{{ tarefa.titulo }}</div>
+
+                                <div class="task-meta">
+                                    {% if tarefa.prazo %}
+                                        Vence: {{ tarefa.prazo.strftime('%d/%m') }}
+                                    {% else %}
+                                        Sem prazo
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="task-amount">
+                                R$ {{ "%.2f"|format(tarefa.valorBase|float) }}
+                            </div>
+                        </a>
+                    {% endfor %}
+
+                {% else %}
+                    <div class="card empty-state">
+                        <i class="fa-regular fa-circle-check"></i>
+                        <p>Tudo em dia! Nenhuma tarefa pendente.</p>
+                    </div>
+                {% endif %}
+                </section>
+            
+            <section class="task-section">
+                <h3 class="section-title">Tarefas Enviadas</h3>
+
+                {% if tarefas_enviadas %}
+                    {% for submissao in tarefas_enviadas %}
+                        <div class="card task-sent-card {{ submissao.status|lower }}">
+                            
+                            <div class="task-info">
+                                <div class="task-title">{{ submissao.tarefa.titulo }}</div>
+                                <div class="task-meta">
+                                    Enviado em: {{ submissao.enviadaEm.strftime('%d/%m/%y') }}
+                                </div>
+                            </div>
+                            
+                            <div class="task-status-details">
+                                <div class="task-amount">
+                                    {% if submissao.status == 'REJECTED' %}
+                                        -R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}
+                                    {% else %}
+                                        +R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}
+                                    {% endif %}
+                                </div>
+                                <div class="status-text">
+                                    {% if submissao.status == 'PENDING' %}
+                                        Aguardando aprovação
+                                    {% elif submissao.status == 'APPROVED' %}
+                                        Aprovado
+                                    {% elif submissao.status == 'REJECTED' %}
+                                        Rejeitado
+                                    {% else %}
+                                        {{ submissao.status }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="card empty-state">
+                        <i class="fa-regular fa-paper-plane"></i>
+                        <p>Nenhuma tarefa enviada para aprovação.</p>
+                    </div>
+                {% endif %}
+            </section>
+            
+            <!-- <div class="quick-links">
+                <a href="#">Ver recompensas disponíveis</a>
+                <a href="#">Ver relatórios</a>
+            </div> -->
+
+           <!-- <a href="{{ url_for('auth.login_page') }}" class="back-link">Sair (Voltar ao Login)</a> --> 
+
+        </main>
+
+        <footer class="app-footer-nav">
+            <a href="{{ url_for('child.home') }}" class="nav-item active">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            
+            <a href="{{ url_for('child.tasks_page') }}" class="nav-item"> 
+                 <i class="fa-solid fa-list-check"></i>
+                 <span>Tarefas</span>
+            </a>
+            
+            <a href="#" class="nav-item"> 
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            
+            <a href="{{ url_for('child.profile_page') }}" class="nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+
+    </div>
+
+</body>
+</html>

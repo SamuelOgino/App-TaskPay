@@ -1,0 +1,100 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Avaliar Tarefas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/parent_tasks.css') }}">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+
+    <div class="phone">
+        <header class="app-header">
+            {{ flash_messages() }}
+            <a href="{{ url_for('parent.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>TaskPay</span>
+            </div>
+            <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-user"></i></a>
+        </header>
+
+        <main class="content-area">
+
+            <div class="page-header">
+                <h2 class="section-title">Tarefas para Avaliação</h2>
+                <p class="section-subtitle">Revise as tarefas enviadas pelos seus filhos.</p>
+            </div>
+
+            {% if tarefas_para_avaliar %}
+                {% for submissao in tarefas_para_avaliar %}
+                <div class="card eval-card">
+                    
+                    <div class="eval-card-header">
+                        <img src="{{ url_for('static', filename='uploads/' + submissao.tarefa.executor.usuario.avatarUrl) if submissao.tarefa.executor.usuario.avatarUrl else url_for('static', filename='default_avatar.png') }}" alt="Foto do Filho" class="child-avatar">
+                        <div class="child-info">
+                            <span class="child-name">{{ submissao.tarefa.executor.usuario.nome }}</span> 
+                            <span class="submission-time" data-utc-time="{{ submissao.enviadaEm.isoformat() }}Z">
+                                Enviando...
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="eval-card-body">
+                        <h3 class="task-title">{{ submissao.tarefa.titulo }}</h3>
+                        
+                        {% if submissao.fotoUrl %}
+                        <img src="{{ url_for('static', filename=submissao.fotoUrl) }}" alt="Foto da tarefa" class="task-photo">
+                        {% endif %}
+                        
+                        <p class="task-description">{{ submissao.tarefa.descricao }}</p>
+                    </div>
+
+                    <div class="eval-card-footer">
+                        <div class="task-value">
+                            <i class="fa-solid fa-coins"></i>
+                            <span>R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}</span>
+                        </div>
+                        <div class="eval-actions">
+                            <a href="{{ url_for('parent.approve_submission', submissao_id=submissao.id) }}" class="btn-eval approve">Aprovar</a>
+                            <a href="{{ url_for('parent.reject_submission', submissao_id=submissao.id) }}" class="btn-eval reject">Rejeitar</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="card empty-state">
+                    <i class="fa-regular fa-hourglass-half"></i>
+                    <p>Nenhuma tarefa enviada para avaliação no momento.</p>
+                </div>
+            {% endif %}
+
+        </main>
+
+        <footer class="app-footer-nav">
+            <a href="{{ url_for('parent.home') }}" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item active"> <i class="fa-solid fa-list-check"></i>
+                <span>Tarefas</span>
+            </a>
+            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            <a href="{{ url_for('parent.profile_page') }}" class="nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/parent_time_converter.js') }}"></script> </body>
+</body>
+</html>

@@ -1,0 +1,206 @@
+/* --- 1. VARIÁVEIS DE COR (Ajustadas para o protótipo) --- */
+:root {
+    --bg: #ffffff;           /* Fundo branco da tela */
+    --bg-externo: #f0f2f5;   /* Fundo cinza-claro (fora do celular) */
+    --logo-color: #0d47a1;   /* Azul escuro do logo */
+    --primary: #007bff;       /* Azul do botão "Pai" e links */
+    --success: #28a745;       /* Verde do botão "Filho" */
+    --text-normal: #555;     /* Texto da tagline e "Não tem conta" */
+    --text-footer: #888;     /* Texto do rodapé (Termos de Serviço) */
+    --border: #eeeeee;       /* Cor da linha divisória */
+    --text-on-btn: #ffffff;  /* Texto branco dos botões */
+}
+
+/* --- 2. SEU CSS BASE (com leves ajustes) --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    background: var(--bg-externo); /* Fundo externo */
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.phone {
+    width: 390px;
+    height: 844px;
+    margin: 0 auto;
+    background: var(--bg); /* Fundo branco do app */
+    color: var(--text-normal);
+    overflow: hidden; /* Esconde overflow */
+    border-radius: 40px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, .2);
+    
+    /* -- Layout Principal -- */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Empurra o rodapé para baixo */
+    position: relative;
+}
+
+/* Simulação em telas menores que o celular */
+@media (max-width: 420px) {
+    .phone {
+        width: 100vw;
+        height: 100svh; /* <-- CORREÇÃO AQUI */
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
+
+.container {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 16px; /* Aumentei o padding para ficar mais alto */
+    border-radius: 999px; /* Botão "pílula" */
+    border: none;
+    font-weight: 600; /* 600 fica mais próximo do protótipo que 700 */
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn.primary {
+    background: var(--primary);
+    color: var(--text-on-btn);
+}
+
+.btn.success {
+    background: var(--success);
+    color: var(--text-on-btn);
+}
+
+.subtitle {
+    margin: 4px 0;
+    color: var(--text-normal);
+    font-size: 1rem; /* 16px (1rem) parece mais correto que 13px */
+    margin-top: 8px;
+}
+
+/* --- 3. CSS ADICIONAL (para esta tela de login) --- */
+
+.main-content {
+    flex: 1 0 auto; /* Permite que cresça, mas não encolha */
+}
+
+/* --- Logo e Tagline --- */
+.logo-container {
+    text-align: center;
+    margin-top: 80px;    /* Espaço do topo da tela */
+    margin-bottom: 50px; /* Espaço até os botões */
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    font-size: 2.5rem; 
+    font-weight: 700;
+    color: var(--logo-color); /* Usa a cor do logo */
+}
+
+.logo i {
+    font-size: 2.2rem;
+    color: var(--logo-color); /* Usa a cor do logo */
+}
+
+.subtitle {
+    text-align: center;
+}
+
+/* --- Grupo de Botões --- */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Divisor e Link de Cadastro --- */
+.divider {
+    border: 0;
+    height: 1px;
+    background-color: var(--border); /* Usa sua variável --border */
+    margin: 25px 0;
+}
+
+.signup-link {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-normal); /* Usa a cor de texto normal */
+}
+
+.signup-link a {
+    color: var(--primary); /* Usa sua variável --primary */
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* --- Rodapé Legal --- */
+.footer-legal {
+    flex-shrink: 0; /* Impede que o rodapé encolha */
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-footer); /* Usa a cor de texto de rodapé */
+    line-height: 1.5;
+    padding-top: 16px;
+    padding-bottom: 30px; /* Espaço da borda inferior */
+}
+
+.footer-legal a {
+    color: var(--text-normal); /* Cor mais escura para os links */
+    font-weight: 500;
+    text-decoration: none; /* Protótipo não tem sublinhado */
+}
+/* --- MUDANÇA (CSS): Regra .flash atualizada para pop-up --- */
+.flash {
+    position: absolute;   /* Faz o item flutuar */
+    top: 20px;            /* 20px do topo do .phone */
+    left: 50%;            /* Centraliza horizontalmente */
+    transform: translateX(-50%);
+    
+    width: auto;          /* Largura automática baseada no texto */
+    min-width: 200px;     /* Largura mínima */
+    max-width: 90%;       /* Não ser maior que 90% do .phone */
+    
+    padding: 12px 16px;   /* Espaçamento interno */
+    border-radius: 12px;  /* Cantos arredondados (como na imagem) */
+    z-index: 1000;        /* Garante que fique SOBRE o conteúdo */
+    
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* Sombra suave */
+    
+    /* Para a animação de sumir */
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.flash.error{
+    background:#fee2e2;
+    border:1px solid #fecaca;
+    color:#7f1d1d
+}
+
+.flash.success{
+    background:#dcfce7;
+    border:1px solid #bbf7d0;
+    color:#064e3b
+}
