@@ -1,0 +1,125 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Perfil (Responsável)</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_parent.css') }}">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+
+    <div class="phone">
+
+        <header class="app-header">
+            <a href="{{ url_for('parent.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>TaskPay</span>
+            </div>
+             <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-user"></i></a>
+        </header>
+
+        <main class="content-area">
+            
+            {{ flash_messages() }}
+
+            <div class="profile-header-parent"> 
+                
+                <div class="profile-pic-container">
+                    <img src="{{ url_for('static', filename=usuario.avatarUrl) if usuario.avatarUrl else url_for('static', filename='default_avatar.png') }}" alt="Foto do Perfil" class="profile-pic">
+
+                    <a href="{{ url_for('parent.edit_profile_page') }}" class="edit-pic-button">
+                        <i class="fa-solid fa-pencil"></i>
+                    </a>
+                </div>
+                
+                <div class="profile-info-text">
+                    <h2>{{ usuario.nome }}</h2>
+                    <p class="role">Responsável</p>
+                </div>
+            </div>
+
+            <section class="child-list-section">
+                <h3 class="section-title">Meus filhos</h3>
+                
+                {% if filhos_data %}
+                    {% for filho_info in filhos_data %}
+                    <a href="#" class="card child-card">
+                        <div class="child-info">
+                            <img src="{{ url_for('static', filename='uploads/' + filho_info.membro.usuario.avatarUrl) if filho_info.membro.usuario.avatarUrl else url_for('static', filename='default_avatar.png') }}" alt="Foto do Filho" class="child-pic">
+                            <div>
+                                <div class="child-name">{{ filho_info.membro.usuario.nome }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="child-stats">
+                            <div class="stat-item">
+                                <span class="label">Tarefas concluídas</span>
+                                <span class="value tasks">{{ filho_info.tarefas_concluidas }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">Saldo mesada</span>
+                                <span class="value balance">R$ {{ "%.2f"|format(filho_info.saldo|float) }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">Streak</span>
+                                <span class="value streak {% if filho_info.is_streak_active %}active{% endif %}">
+                                    <i class="fa-solid fa-fire-flame-curved"></i>
+                                    {{ filho_info.streak_dias }} dias
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="card empty-state">
+                        <p>Nenhum filho cadastrado nesta família.</p>
+                    </div>
+                {% endif %}
+            </section>
+            
+            <section class="settings-section">
+                <h3 class="section-title">Configurações</h3>
+                <a href="#" class="card setting-item">
+                    <span><i class="fa-solid fa-lock"></i> Configuração</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </a>
+                <a href="#" class="card setting-item">
+                    <span><i class="fa-solid fa-question-circle"></i> Ajuda e suporte</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </a>
+            </section>
+            
+            <a href="{{ url_for('auth.logout') }}" class="back-link">Sair da conta</a>
+
+        </main>
+
+        <footer class="app-footer-nav">
+            <a href="{{ url_for('parent.home') }}" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tarefas</span>
+            </a>
+            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            <a href="{{ url_for('parent.profile_page') }}" class="nav-item active">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+        <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+    </div>
+
+</body>
+</html>

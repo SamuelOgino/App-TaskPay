@@ -1,0 +1,445 @@
+/* --- 1. VARIÁVEIS DE COR (Conforme o protótipo da imagem) --- */
+:root {
+  --bg: #f5f7fb;
+  --bg-externo: #f0f2f5;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #1367d4;
+  --success: #16a34a;
+  --danger: #dc3545;
+  --border: #e5e7eb;
+  --text-on-btn: #ffffff;
+  --bg-light-gray: #f8f9fa;
+  --warning: #f59e0b;
+  /* Cores específicas dos cards de avaliação */
+  --bg-task-eval: #e0f7fa;
+  /* Fundo azul claro para avaliar */
+  --text-task-eval-status: #0c4a6e;
+  /* Texto "Concluída" */
+}
+
+/* --- 2. CSS BASE DO APLICATIVO --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background: var(--bg-externo);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: var(--text);
+}
+
+.phone {
+  width: 390px;
+  height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  border-radius: 40px;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, .2);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+@media (max-width: 420px) {
+  .phone {
+    width: 100vw;
+    height: 100svh; /* <-- CORREÇÃO AQUI */
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* --- 3. ESTILOS DO CABEÇALHO --- */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--primary);
+  color: var(--text-on-btn);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.app-header .logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  /* --- ADICIONE ESTAS 4 LINHAS --- */
+  position: absolute;       /* 1. Diz ao logo para flutuar */
+  left: 50%;                /* 2. Move 50% para a direita */
+  top: 50%;                 /* 3. Move 50% para baixo */
+  transform: translate(-50%, -50%); /* 4. Puxa de volta para o centro exato */
+}
+
+.app-header i {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.app-header a {
+  color: var(--text-on-btn);
+  text-decoration: none;
+}
+
+/* --- 4. ESTILOS DO CONTEÚDO PRINCIPAL --- */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Saudação */
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  /* Margem menor */
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Card de Resumo Financeiro */
+.financial-summary-card {
+  background: var(--primary);
+  color: var(--text-on-btn);
+  border-radius: 12px;
+}
+
+.financial-summary-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.summary-item span {
+  opacity: 0.8;
+}
+
+.summary-item strong {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Barra de progresso dentro do card azul */
+.progress-bar-faded {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.progress-bar-inner-faded {
+  height: 100%;
+  width: 37.5%;
+  /* 45 / 120 */
+  background-color: var(--text-on-btn);
+  border-radius: 99px;
+}
+
+/* Seções de Tarefas */
+.task-section {
+  margin-top: 24px;
+}
+
+.task-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.btn-new-task {
+  background: var(--success);
+  color: var(--text-on-btn);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ESTADO VAZIO (Empty State) */
+.empty-state {
+  background-color: var(--bg-light-gray);
+  border-color: var(--border);
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.empty-state i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Estilos dos botões de avaliação (para quando você for usá-los) */
+.btn-action-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-eval {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-eval.approve {
+  background: var(--success);
+  color: var(--text-on-btn);
+}
+
+.btn-eval.reject {
+  background: var(--danger);
+  color: var(--text-on-btn);
+}
+
+/* --- 5. ESTILOS DO RODAPÉ --- */
+.app-footer-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
+  flex-shrink: 0;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  gap: 4px;
+  padding: 5px 0;
+}
+
+.nav-item i {
+  font-size: 1.4rem;
+}
+
+/* Item "Início" está ativo nesta tela */
+.nav-item.active {
+  color: var(--primary);
+}
+
+/* Link de Sair (temporário para teste) */
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+/* --- MUDANÇA 1 (CSS): Adicionamos estilos para o novo Task Card --- */
+/* Card de Tarefa Individual (para a lista de pendentes) */
+.task-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--primary);
+  text-decoration: none;
+}
+
+/* --- Estilos de Prioridade --- */
+.task-card.priority-BAIXA {
+  border-left-color: var(--success);
+  /* Verde */
+}
+
+.task-card.priority-MEDIA {
+  border-left-color: var(--warning);
+  /* Amarelo/Laranja */
+}
+
+.task-card .task-icon {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-right: 12px;
+}
+
+.task-card .task-info {
+  flex: 1;
+}
+
+.task-card .task-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.task-card .task-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.task-card .task-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-left: 10px;
+}
+
+/* --- MUDANÇA (CSS): Regra .flash atualizada para pop-up --- */
+.flash {
+  position: absolute;
+  /* Faz o item flutuar */
+  top: 20px;
+  /* 20px do topo do .phone */
+  left: 50%;
+  /* Centraliza horizontalmente */
+  transform: translateX(-50%);
+  width: auto;
+  /* Largura automática baseada no texto */
+  min-width: 200px;
+  /* Largura mínima */
+  max-width: 90%;
+  /* Não ser maior que 90% do .phone */
+  padding: 12px 16px;
+  /* Espaçamento interno */
+  border-radius: 12px;
+  /* Cantos arredondados (como na imagem) */
+  z-index: 1000;
+  /* Garante que fique SOBRE o conteúdo */
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  /* Sombra suave */
+  /* Para a animação de sumir */
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.flash.error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #7f1d1d;
+}
+
+.flash.success {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #064e3b;
+}
+
+/* ... (suas regras .priority-MEDIA e .priority-ALTA) ... */
+
+.task-card.priority-ALTA {
+    border-left-color: var(--danger);
+    /* Vermelho */
+}
+
+/* --- ADICIONE ESTE NOVO BLOCO --- */
+
+/* 1. Define o fundo azul para o card de avaliação */
+/* 1. Define o fundo azul para o card de avaliação */
+.task-card.priority-EVAL {
+    background-color: #dbeafe; /* Fundo azul claro (do protótipo) */
+    border-left-style: none; /* <-- REMOVE O FEIXE (BORDA) */
+    /* (Opcional: faz a borda geral combinar com o fundo) */
+    border-color: #dbeafe; 
+}
+
+/* 2. Garante que o texto dentro do card azul fique legível */
+.task-card.priority-EVAL .task-title {
+    color: var(--text); 
+}
+.task-card.priority-EVAL .task-amount {
+    color: var(--success); /* <-- MUDANÇA: Dinheiro verde */
+}
+
+.task-card.priority-EVAL .task-icon {
+    color: var(--primary); /* Mantém o ícone azul escuro */
+}
+
+.task-card.priority-EVAL .task-meta {
+    color: var(--muted); /* Mantém o subtexto cinza */
+}
+/* --- FIM DO NOVO BLOCO --- */
+
+/* --- Efeito de clique ATUALIZADO (azul escuro) --- */
+
+/* ... (fim da sua regra .task-card.priority-EVAL .task-meta) ... */
+
+/* --- ADICIONE ESTE NOVO BLOCO --- */
+
+/* Efeito de clique SOMENTE para os cards de avaliação (azuis) */
+.task-card.priority-EVAL:active {
+    background-color: var(--primary); /* 1. O fundo fica azul escuro */
+    border-color: var(--primary);     /* 2. A borda fica azul escura */
+    transform: scale(1.03);
+}
+
+/* Força o TEXTO do card azul a ficar branco durante o clique */
+.task-card.priority-EVAL:active .task-title,
+.task-card.priority-EVAL:active .task-meta,
+.task-card.priority-EVAL:active .task-meta strong,
+.task-card.priority-EVAL:active .task-icon,
+.task-card.priority-EVAL:active .task-amount {
+    color: var(--text-on-btn); /* 3. O título, meta, ícone e valor ficam brancos */
+}
+/* --- FIM DO NOVO BLOCO --- */

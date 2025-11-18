@@ -1,0 +1,263 @@
+/* static/css/parent_tasks.css */
+
+/* --- 1. VARIÁVEIS DE COR --- */
+:root {
+    --bg: #f5f7fb;
+    --bg-externo: #f0f2f5;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #1367d4;
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --danger: #dc3545;
+    --border: #e5e7eb;
+    --text-on-btn: #ffffff;
+    --bg-light-gray: #f8f9fa;
+}
+
+/* --- 2. CSS BASE DO APLICATIVO --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+    background: var(--bg-externo);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text);
+}
+.phone {
+    width: 390px;
+    height: 844px;
+    margin: 0 auto;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    border-radius: 40px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, .2);
+    display: flex;
+    flex-direction: column;
+}
+@media (max-width: 420px) {
+  .phone {
+    width: 100vw;
+    height: 100svh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* --- 3. CABEÇALHO E RODAPÉ --- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--primary);
+    color: var(--text-on-btn);
+    flex-shrink: 0;
+    position: relative;
+}
+.app-header .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.app-header i { font-size: 1.5rem; cursor: pointer; }
+.app-header a { color: var(--text-on-btn); text-decoration: none; }
+.app-footer-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 8px 0;
+    flex-shrink: 0;
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    gap: 4px;
+    padding: 5px 0;
+}
+.nav-item i { font-size: 1.4rem; }
+.nav-item.active { color: var(--primary); }
+
+/* --- 4. CONTEÚDO PRINCIPAL --- */
+.content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+.page-header {
+    margin-bottom: 16px;
+}
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+.section-subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.empty-state {
+    background-color: var(--bg-light-gray);
+    border: 1px dashed var(--border);
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+}
+.empty-state i {
+    font-size: 2rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+.empty-state p { font-weight: 500; }
+
+/* ===============================================
+== 5. ESTILOS DO CARD DE AVALIAÇÃO (Protótipo) ==
+===============================================
+*/
+.eval-card {
+    padding: 0; /* Remove o padding do .card base */
+    overflow: hidden; /* Garante que a foto não vaze */
+}
+
+/* 1. Cabeçalho do Card (Avatar, Nome, Data) */
+.eval-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 12px 16px;
+}
+.child-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.child-info {
+    flex: 1;
+}
+
+/* FORÇA O TEXTO A QUEBRAR A LINHA */
+/* (Remove .child-info da frente) */
+.child-name,
+.submission-time {
+    display: block; /* Faz cada um ocupar uma linha inteira */
+}
+
+/* Ajusta o espaçamento */
+.child-name {
+    margin-bottom: 2px;
+}
+
+.child-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.submission-time {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+/* 2. Corpo do Card (Título, Foto, Descrição) */
+.eval-card-body {
+    padding: 0 16px 12px 16px;
+}
+.task-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+.task-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+}
+.task-description {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* 3. Rodapé do Card (Valor e Botões) */
+.eval-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--bg-light-gray);
+    border-top: 1px solid var(--border);
+}
+
+.task-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.task-value i {
+    color: var(--warning);
+    font-size: 1.2rem;
+}
+
+.eval-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-eval {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 10px;
+    color: var(--text-on-btn);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-eval.approve {
+    background-color: var(--success);
+}
+.btn-eval.approve:active {
+    background-color: #148a3e; /* Verde mais escuro */
+}
+
+.btn-eval.reject {
+    background-color: var(--danger);
+}
+.btn-eval.reject:active {
+    background-color: #b02a37; /* Vermelho mais escuro */
+}

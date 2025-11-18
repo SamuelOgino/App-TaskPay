@@ -1,0 +1,519 @@
+/* --- 1. VARIÁVEIS DE COR (Conforme o protótipo da imagem) --- */
+:root {
+  --bg: #f5f7fb;
+  /* Fundo principal da tela */
+  --bg-externo: #f0f2f5;
+  /* Fundo cinza claro fora do celular */
+  --card: #ffffff;
+  /* Fundo dos cards brancos */
+  --text: #0f172a;
+  /* Cor padrão do texto (quase preto) */
+  --muted: #64748b;
+  /* Texto mais discreto (cinza) */
+  --primary: #1367d4;
+  /* Azul principal (cabeçalho, ícones ativos, links) */
+  --success: #16a34a;
+  /* Verde para saldo e tarefas aprovadas */
+  --warning: #f59e0b;
+  /* Laranja para XP e ícone de chama */
+  --border: #e5e7eb;
+  /* Cor da linha das bordas */
+  --text-on-btn: #ffffff;
+  /* Texto branco em botões/cabeçalho azul */
+  --bg-light-gray: #f8f9fa;
+  /* Fundo claro para estados vazios */
+  --bg-task-sent: #dbeafe;;
+  /* Fundo azul claro para tarefa enviada (pending) */
+  --bg-task-approved: #dcfce7;
+  /* Fundo verde claro para tarefa aprovada */
+  --text-task-sent: #0c4a6e;
+  /* Texto azul escuro para tarefa enviada */
+  --text-task-approved: #15803d;
+  /* Texto verde escuro para tarefa aprovada */
+  --danger: #dc3545;
+  /* Vermelho para o botão Rejeitar e prioridade alta */
+  --bg-task-rejected: #ffe2e2; /* Fundo vermelho claro */
+  --text-task-rejected: #9b1c1c; /* Texto vermelho escuro */
+}
+
+/* --- 2. CSS BASE DO APLICATIVO (Estrutura do Celular) --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background: var(--bg-externo);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: var(--text);
+}
+
+.phone {
+  width: 390px;
+  height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  border-radius: 40px;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, .2);
+  display: flex;
+  flex-direction: column;
+  /* Cabeçalho, conteúdo rolável, rodapé */
+}
+
+@media (max-width: 420px) {
+  .phone {
+    width: 100vw;
+    height: 100svh; /* <-- CORREÇÃO AQUI */
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* --- 3. ESTILOS DO CABEÇALHO --- */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--primary);
+  color: var(--text-on-btn);
+  flex-shrink: 0;
+  position: relative; /* <<< ADICIONE ESTA LINHA */
+}
+
+.app-header .logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  /* --- ADICIONE ESTAS 4 LINHAS --- */
+  position: absolute;       /* 1. Diz ao logo para flutuar */
+  left: 50%;                /* 2. Move 50% para a direita */
+  top: 50%;                 /* 3. Move 50% para baixo */
+  transform: translate(-50%, -50%); /* 4. Puxa de volta para o centro exato */
+}
+
+.app-header i {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.app-header a {
+  color: var(--text-on-btn);
+  text-decoration: none;
+}
+
+/* --- 4. ESTILOS DO CONTEÚDO PRINCIPAL --- */
+.content-area {
+  flex: 1;
+  /* Ocupa todo o espaço vertical restante */
+  overflow-y: auto;
+  /* Permite rolagem se o conteúdo for grande */
+  padding: 20px;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Card de XP */
+.xp-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.xp-info {
+  flex: 1;
+}
+
+.xp-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  /* O 75% FIXO FOI REMOVIDO DAQUI */
+  background-color: var(--warning);
+  border-radius: 99px;
+}
+
+.flame-icon {
+  font-size: 2.5rem;
+  color: var(--warning);
+}
+
+/* Card de Saldo da Mesada */
+.balance-card .balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.balance-card .title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.balance-card .balance-amount {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--success);
+  line-height: 1;
+}
+
+.balance-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.balance-details li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 6px 0;
+}
+
+.balance-details li span {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Seções de Tarefas */
+.task-section {
+  margin-top: 24px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* ESTADO VAZIO (Empty State) */
+.empty-state {
+  background-color: var(--bg-light-gray);
+  border-color: var(--border);
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.empty-state i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Card de Tarefa Individual */
+.task-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--primary);
+  text-decoration: none;
+  transition: all 0.1s ease-out; 
+}
+
+/* --- Efeito de clique ATUALIZADO (azul escuro) --- */
+
+/* Quando o cartão for clicado... */
+.task-card:active {
+    background-color: var(--primary); /* 1. O fundo fica azul escuro */
+    border-color: var(--primary);     /* 2. A borda cinza normal também fica azul */
+    transform: scale(1.03);
+}
+
+/* ...também precisamos FORÇAR todo o conteúdo a ficar branco */
+.task-card:active .task-title,
+.task-card:active .task-meta,
+.task-card:active .task-icon,
+.task-card:active .task-amount {
+    color: var(--text-on-btn); /* 3. O título, meta, ícone e valor ficam brancos */
+}
+
+.task-card .task-info {
+  flex: 1;
+}
+
+.task-card .task-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.task-card .task-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* (Estilo para o texto do valor, agora verde) */
+.task-card .task-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--success);
+  /* <-- MUDADO de --primary para --success (verde) */
+  margin-left: 10px;
+}
+
+/* --- Novos Estilos (Copiados do PAI) --- */
+.task-card .task-icon {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-right: 12px;
+}
+
+.task-card.priority-BAIXA {
+  border-left-color: var(--success);
+  /* Verde */
+}
+
+.task-card.priority-MEDIA {
+  border-left-color: var(--warning);
+  /* Amarelo/Laranja */
+}
+
+.task-card.priority-ALTA {
+  border-left-color: var(--danger);
+  /* Vermelho */
+}
+
+/* Seções de Tarefas Enviadas */
+.task-sent-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Alinha verticalmente */
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid transparent;
+}
+
+.task-sent-card.pending {
+  background: var(--bg-task-sent);
+  border-color: var(--bg-task-sent);
+}
+
+.task-sent-card.approved {
+  background: var(--bg-task-approved);
+  border-color: var(--success);
+}
+
+.task-sent-card .task-info {
+  flex: 1;
+}
+
+.task-sent-card .task-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.task-sent-card .task-meta {
+    font-size: 0.8rem;
+    color: var(--text); /* <-- MUDANÇA (mais escuro) */
+    opacity: 0.7; /* <-- Um pouco mais suave */
+}
+
+.task-sent-card .status-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+.task-sent-card.pending .status-text {
+  color: var(--text-task-sent);
+}
+
+.task-sent-card.approved .status-text {
+  color: var(--text-task-approved);
+}
+
+/* Links Rápidos */
+.quick-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.quick-links a {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+/* Link de Sair (temporário para teste) */
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+/* --- 5. ESTILOS DO RODAPÉ --- */
+.app-footer-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
+  flex-shrink: 0;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  gap: 4px;
+  padding: 5px 0;
+  /* Aumenta a área clicável */
+}
+
+.nav-item i {
+  font-size: 1.4rem;
+}
+
+.nav-item.active {
+  color: var(--primary);
+}
+
+/* --- ADICIONE ESTE NOVO BLOCO --- */
+
+/* Contêiner para o Valor e o Status (lado direito) */
+.task-status-details {
+    text-align: right; /* Alinha o texto (R$ e Status) à direita */
+    flex-shrink: 0;  /* Impede que encolha */
+    margin-left: 10px; /* Espaço entre o texto e o valor */
+}
+
+/* O valor (ex: +R$ 8,00) */
+.task-status-details .task-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text); /* Cor padrão do valor */
+    margin-bottom: 4px;
+}
+
+/* Muda a cor do valor para verde se APROVADO */
+.task-sent-card.approved .task-amount {
+    color: var(--success);
+}
+
+/* Muda a cor do valor para azul se PENDENTE */
+.task-sent-card.pending .task-amount {
+    color: var(--primary);
+}
+
+.task-sent-card.approved {
+  background: var(--bg-task-approved);
+  border-color: var(--success);
+}
+
+/* --- ADICIONE ESTE NOVO BLOCO --- */
+.task-sent-card.rejected {
+  background: var(--bg-task-rejected);
+  border-color: var(--bg-task-rejected);
+}
+
+.task-sent-card.rejected .task-amount {
+  color: var(--danger); /* Valor em vermelho */
+}
+
+.task-sent-card.rejected .status-text {
+  color: var(--text-task-rejected); /* "Rejeitado" em vermelho escuro */
+}
+/* --- FIM DO NOVO BLOCO --- */
+
+/* --- ESTILOS DO FOGUINHO (SOMENTE ÍCONE) --- */
+
+.streak-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 16px; /* Um espacinho para separar da barra de XP */
+}
+
+.streak-container i {
+    font-size: 2.2rem; /* Tamanho do ícone */
+    transition: all 0.5s ease; /* Transição suave entre cores */
+}
+
+/* --- ESTADO 1: APAGADO (Cinza e sem vida) --- */
+.streak-container.fire-off i {
+    color: #555555;
+    opacity: 0.5;         /* Meio transparente */
+    transform: scale(0.9); 
+    filter: grayscale(100%); /* Garante que fica preto e branco */
+}
+
+/* --- ESTADO 2: ACESO (Laranja e vivo) --- */
+.streak-container.fire-on i {
+    color: var(--warning); /* Usa o laranja */
+    opacity: 1;
+    transform: scale(1.1); /* Levemente maior */
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5)); /* Brilho sutil */
+    animation: pulseFire 2s infinite; /* Pulsa devagar */
+}
+
+/* Animação suave do pulsar */
+@keyframes pulseFire {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.2); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.8)); }
+    100% { transform: scale(1.1); }
+}
