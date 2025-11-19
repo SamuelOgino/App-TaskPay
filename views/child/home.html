@@ -54,7 +54,7 @@
                     
                     <li>Tarefas rejeitadas: <span>- R$ {{ "%.2f"|format(soma_rejeitadas|float) }}</span></li>
                     
-                    <li>Recompensas resgatadas: <span>- {{ soma_xp_gasto }} XP</span></li>
+                    <li>Recompensas resgatadas: <span style="color: #ef4444;">- {{ soma_xp_gasto }} XP</span></li>
                 </ul>
             </div>
             
@@ -168,7 +168,7 @@
                  <span>Tarefas</span>
             </a>
             
-            <a href="#" class="nav-item"> 
+            <a href="{{ url_for('child.rewards_page') }}" class="nav-item"> 
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>

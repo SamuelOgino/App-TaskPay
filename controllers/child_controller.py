@@ -3,9 +3,9 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from extensions import db
 from models.models import (
     Progresso, Carteira, Transacao, TransactionType, Role, Tarefa, TaskStatus, 
-    Membro, Submissao, SubmissionStatus, Notificacao, ResgateRecompensa
+    Membro, Submissao, SubmissionStatus, Notificacao, ResgateRecompensa, Recompensa, ResgateStatus
 )
-from sqlalchemy.sql import func, or_ # Para fazer cálculos (soma)
+from sqlalchemy.sql import func, or_, and_ # Para fazer cálculos (soma)
 from datetime import datetime, timedelta # Para o foguinho
 
 # --- MUDANÇA 1: Novas importações para upload de ficheiros ---
@@ -76,7 +76,7 @@ def home():
     ).scalar() or 0.0
     soma_xp_gasto = db.session.query(func.sum(ResgateRecompensa.xpPago)).filter(
         ResgateRecompensa.membro_id == membro_id,
-        ResgateRecompensa.status == 'APPROVED' # (Ou o status que você usa para 'gasto')
+        ResgateRecompensa.status != ResgateStatus.REJECTED # Conta Pending e Delivered
     ).scalar() or 0
     
     # Buscar as Tarefas Pendentes
@@ -183,7 +183,7 @@ def profile_page():
     nivel = progresso.nivel
     max_xp = 1000
     xp_percent = (current_xp / max_xp) * 100 if max_xp > 0 else 0
-    xp_total_acumulado = progresso.xp_total
+    xp_total_acumulado = membro.saldoXP
     saldo_atual = carteira.saldo
 
     tarefas_concluidas_count = Submissao.query.join(Tarefa).filter(
@@ -454,3 +454,112 @@ def submit_task_photo(tarefa_id):
              flash(f"Erro ao enviar a foto: {e}", "error")
 
     return redirect(url_for("child.tasks_page"))
+
+# --- NOVAS ROTAS: TELA DE RECOMPENSAS ---
+@bp.get("/rewards")
+def rewards_page():
+    """Exibe a Loja e o Histórico de Resgates (Regra de 36h)."""
+    guard = _require_child()
+    if guard: return guard
+    
+    membro = Membro.query.get(session.get('membro_id'))
+    
+    # 1. Dados de Saldo e XP
+    saldo_atual = membro.carteira.saldo
+    xp_atual = membro.saldoXP
+    
+    # --- MUDANÇA 1: BUSCAR HISTÓRICO DE RESGATES (PEDIDOS) ---
+    
+    # Define o limite de tempo (Agora - 36 horas)
+    limite_tempo = datetime.utcnow() - timedelta(hours=36)
+    
+    historico_resgates = db.session.query(ResgateRecompensa).filter(
+        ResgateRecompensa.membro_id == membro.id,
+        or_(
+            # CASO 1: Está Pendente (Mostra sempre)
+            ResgateRecompensa.status == ResgateStatus.PENDING,
+            
+            # CASO 2: Foi Entregue (Aceita) OU Rejeitada HÁ MENOS DE 36H
+            and_(
+                ResgateRecompensa.status.in_([ResgateStatus.DELIVERED, ResgateStatus.REJECTED]),
+                ResgateRecompensa.criadoEm >= limite_tempo
+            )
+        )
+    ).order_by(ResgateRecompensa.criadoEm.desc()).all()
+    
+    # ---------------------------------------------------------
+    
+    # Lógica de Filtro da Loja (Mantida igual à anterior)
+    resgates_familia = db.session.query(ResgateRecompensa.recompensa_id)\
+        .join(Membro, ResgateRecompensa.membro_id == Membro.id)\
+        .filter(Membro.familia_id == membro.familia_id)\
+        .all()
+    ids_esconder = [r.recompensa_id for r in resgates_familia]
+    
+    query_loja = Recompensa.query.filter_by(familia_id=membro.familia_id, ativa=True)
+    if ids_esconder:
+        query_loja = query_loja.filter(Recompensa.id.notin_(ids_esconder))
+        
+    recompensas_disponiveis = query_loja.order_by(Recompensa.custoXP.asc()).all()
+    
+    return render_template(
+        "child/rewards.html",
+        membro=membro,
+        saldo_atual=saldo_atual,
+        xp_atual=xp_atual,
+        # MUDANÇA NO NOME DA VARIÁVEL ENVIADA:
+        historico_resgates=historico_resgates, 
+        recompensas=recompensas_disponiveis,
+        now=datetime.utcnow()
+    )
+
+@bp.post("/rewards/redeem/<recompensa_id>")
+def redeem_reward(recompensa_id):
+    """Processa o pedido de resgate de uma recompensa."""
+    guard = _require_child()
+    if guard: return guard
+    
+    membro = Membro.query.get(session.get('membro_id'))
+    recompensa = db.session.get(Recompensa, recompensa_id)
+    
+    # Validações
+    if not recompensa or recompensa.familia_id != membro.familia_id:
+        flash("Recompensa não encontrada.", "error")
+        return redirect(url_for("child.rewards_page"))
+        
+    if membro.saldoXP < recompensa.custoXP:
+        flash(f"Você precisa de mais XP para isso! (Custo: {recompensa.custoXP})", "error")
+        return redirect(url_for("child.rewards_page"))
+        
+    try:
+        # 1. Deduz o XP
+        membro.saldoXP -= recompensa.custoXP
+        
+        # 2. Cria o registro de resgate
+        resgate = ResgateRecompensa(
+            recompensa_id=recompensa.id,
+            membro_id=membro.id,
+            xpPago=recompensa.custoXP,
+            status=ResgateStatus.PENDING
+        )
+        db.session.add(resgate)
+        
+        # 3. Notifica os pais
+        pais = _get_parent_members(membro.familia_id)
+        for pai in pais:
+            notif = Notificacao(
+                tipo="NOVO_RESGATE",
+                mensagem=f"{membro.usuario.nome} resgatou '{recompensa.titulo}'!",
+                usuario_id=pai.usuario_id
+            )
+            db.session.add(notif)
+            
+        db.session.commit()
+        flash(f"Pedido de '{recompensa.titulo}' enviado! Aguarde seus pais.", "success")
+        
+    except Exception as e:
+        db.session.rollback()
+        flash("Erro ao processar resgate.", "error")
+        
+    return redirect(url_for("child.rewards_page"))
+

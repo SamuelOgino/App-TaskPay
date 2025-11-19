@@ -6,11 +6,11 @@ from extensions import db
 from uuid import uuid4
 import os
 from werkzeug.utils import secure_filename
-from sqlalchemy.sql import func # <-- MUDANÇA 1: Adicionado para fazer SOMA
+from sqlalchemy.sql import func, or_
 
 
 # --- Importação ATUALIZADA (com Submissao, Progresso, etc.) ---
-from models.models import Membro, Role, Tarefa, Notificacao, TaskStatus, Recompensa, ResgateRecompensa, Submissao, SubmissionStatus, Progresso, Carteira, Usuario, Transacao, TransactionType
+from models.models import Membro, Role, Tarefa, Notificacao, TaskStatus, Recompensa, ResgateRecompensa, Submissao, SubmissionStatus, Progresso, Carteira, Usuario, Transacao, TransactionType, ResgateStatus
 
 bp = Blueprint("parent", __name__, url_prefix="/parent")
 
@@ -186,30 +186,72 @@ def create_task():
 
 @bp.get("/rewards")
 def rewards_page():
-    # ... (o resto do seu arquivo, sem mudanças) ...
+    """Exibe a tela de Recompensas do PAI com filtros inteligentes."""
     guard = _require_parent()
     if guard: return guard
+    
     parent_member = Membro.query.filter_by(usuario_id=session.get("user_id"), role=Role.PARENT).first()
     filhos = Membro.query.filter_by(familia_id=parent_member.familia_id, role=Role.CHILD).all()
+    
+    # 1. Resumo de XP (Sem mudanças)
     xp_por_filho = [{
         "id": f.id, 
         "nome": f.usuario.nome, 
         "xp": (f.saldoXP or 0),
-        "avatar": f.usuario.avatarUrl # <-- MUDANÇA AQUI
+        "avatar": f.usuario.avatarUrl
     } for f in filhos]
-    ativas = Recompensa.query.filter_by(familia_id=parent_member.familia_id, ativa=True).order_by(Recompensa.criadoEm.desc()).all()
+    
+    # --- LÓGICA 1: FILTRAR RECOMPENSAS ATIVAS (Esconder as já pegas) ---
+    
+    # Busca IDs de tudo que JÁ FOI RESGATADO por alguém da família
+    resgates_familia = db.session.query(ResgateRecompensa.recompensa_id)\
+        .join(Membro, ResgateRecompensa.membro_id == Membro.id)\
+        .filter(Membro.familia_id == parent_member.familia_id)\
+        .all()
+    
+    ids_ja_resgatados = [r.recompensa_id for r in resgates_familia]
+    
+    # Monta a busca das ativas
+    query_ativas = Recompensa.query.filter_by(
+        familia_id=parent_member.familia_id, 
+        ativa=True
+    )
+    
+    # Se tiver itens resgatados, remove eles da lista
+    if ids_ja_resgatados:
+        query_ativas = query_ativas.filter(Recompensa.id.notin_(ids_ja_resgatados))
+        
+    ativas = query_ativas.order_by(Recompensa.criadoEm.desc()).all()
+    
+    
+    # --- LÓGICA 2: HISTÓRICO LIMPO (Regra das 36 horas) ---
+    
+    # Define o tempo de corte (Agora - 36 horas)
+    limite_tempo = datetime.utcnow() - timedelta(hours=36)
+    
     historico = (
         ResgateRecompensa.query
         .join(Membro, ResgateRecompensa.membro_id == Membro.id)
         .join(Recompensa, ResgateRecompensa.recompensa_id == Recompensa.id)
         .filter(Membro.familia_id == parent_member.familia_id)
-        .order_by(ResgateRecompensa.criadoEm.desc()).limit(20).all()
+        .filter(
+            or_(
+                # MOSTRA SE: Estiver Pendente (sempre mostra para o pai decidir)
+                ResgateRecompensa.status == ResgateStatus.PENDING,
+                
+                # OU SE: Foi criado há menos de 36 horas (para ver o histórico recente)
+                ResgateRecompensa.criadoEm >= limite_tempo
+            )
+        )
+        .order_by(ResgateRecompensa.criadoEm.desc())
+        .all()
     )
+
     return render_template("parent/rewards.html",
                            filhos=filhos,
                            xp_por_filho=xp_por_filho,
-                           ativas=ativas,
-                           historico=historico)
+                           ativas=ativas,     # Lista filtrada (sem itens pegos)
+                           historico=historico) # Lista filtrada (sem itens velhos)
 
 @bp.get("/rewards/new")
 def new_reward_page():
@@ -289,9 +331,15 @@ def approve_submission(submissao_id):
             carteira_filho = Carteira(membro_id=membro_filho.id)
             db.session.add(carteira_filho)
             
-        # --- CORREÇÃO 1: LÓGICA DE SALDO E TRANSAÇÃO ---
         carteira_filho.saldo = (carteira_filho.saldo or 0) + tarefa.valorBase
         
+        # --- NOVA LINHA: ADICIONA O XP AO SALDO PARA GASTAR NA LOJA ---
+        # Supondo que 1 Real = 10 XP (ou use uma regra fixa como +100 XP por tarefa)
+        xp_ganho = 100 # Defina quanto XP a tarefa vale
+        membro_filho.saldoXP = (membro_filho.saldoXP or 0) + xp_ganho
+        
+
+
         # Cria o registro da transação para o extrato do filho
         transacao = Transacao(
             tipo=TransactionType.CREDIT_TASK,
@@ -309,10 +357,10 @@ def approve_submission(submissao_id):
         # --- CORREÇÃO 2: LÓGICA DE LEVEL UP (XP Fixo 1000) ---
         
         # 1. Adiciona o XP ao total acumulativo
-        progresso_filho.xp_total = (progresso_filho.xp_total or 0) + 500
+        progresso_filho.xp_total = (progresso_filho.xp_total or 0) + 100
         
         # 2. Adiciona o XP à barra do nível atual
-        progresso_filho.xp = (progresso_filho.xp or 0) + 500
+        progresso_filho.xp = (progresso_filho.xp or 0) + 100
         progresso_filho.ultimaTarefaEm = datetime.utcnow()
 
         # 3. Verifica se o filho passou de nível (1000 XP fixo)
@@ -598,3 +646,90 @@ def reject_submission(submissao_id):
         flash(f"Ocorreu um erro: {e}", "error")
         
     return redirect(url_for("parent.tasks_page"))
+
+# Adicione isso no FINAL do arquivo controllers/parent_controller.py
+
+@bp.get("/rewards/deliver/<resgate_id>")
+def deliver_reward(resgate_id):
+    """Marca uma recompensa como ENTREGUE (Aprovada)."""
+    guard = _require_parent()
+    if guard: return guard
+    
+    parent_member = _current_parent_member()
+    resgate = db.session.get(ResgateRecompensa, resgate_id)
+    
+    # Validações de segurança
+    if not resgate:
+        flash("Resgate não encontrado.", "error")
+        return redirect(url_for("parent.rewards_page"))
+        
+    # Verifica se o pai tem permissão (se é da mesma família)
+    membro_filho = resgate.membro
+    if membro_filho.familia_id != parent_member.familia_id:
+        flash("Permissão negada.", "error")
+        return redirect(url_for("parent.rewards_page"))
+
+    try:
+        # Atualiza Status
+        resgate.status = ResgateStatus.DELIVERED # Item entregue!
+        
+        # Notifica o filho
+        notif = Notificacao(
+            tipo="RECOMPENSA_ENTREGUE",
+            mensagem=f"Oba! Sua recompensa '{resgate.recompensa.titulo}' foi entregue!",
+            usuario_id=membro_filho.usuario_id
+        )
+        db.session.add(notif)
+        db.session.commit()
+        
+        flash("Recompensa marcada como entregue!", "success")
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro: {e}", "error")
+        
+    return redirect(url_for("parent.rewards_page"))
+
+
+@bp.get("/rewards/reject/<resgate_id>")
+def reject_reward(resgate_id):
+    """Rejeita o pedido e DEVOLVE O XP para o filho."""
+    guard = _require_parent()
+    if guard: return guard
+    
+    parent_member = _current_parent_member()
+    resgate = db.session.get(ResgateRecompensa, resgate_id)
+    
+    if not resgate or resgate.membro.familia_id != parent_member.familia_id:
+        flash("Erro ao processar.", "error")
+        return redirect(url_for("parent.rewards_page"))
+
+    if resgate.status != ResgateStatus.PENDING:
+        flash("Este item já foi processado.", "warning")
+        return redirect(url_for("parent.rewards_page"))
+
+    try:
+        # 1. Muda status para REJEITADO
+        resgate.status = ResgateStatus.REJECTED
+        
+        # 2. REEMBOLSO: Devolve o XP gasto para a carteira do filho
+        filho = resgate.membro
+        xp_para_devolver = resgate.xpPago
+        filho.saldoXP = (filho.saldoXP or 0) + xp_para_devolver
+        
+        # 3. Notifica
+        notif = Notificacao(
+            tipo="RECOMPENSA_REJEITADA",
+            mensagem=f"O pedido de '{resgate.recompensa.titulo}' foi cancelado. Seus {xp_para_devolver} XP foram devolvidos.",
+            usuario_id=filho.usuario_id
+        )
+        db.session.add(notif)
+        db.session.commit()
+        
+        flash(f"Pedido rejeitado. {xp_para_devolver} XP foram devolvidos para {filho.usuario.nome}.", "success")
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro: {e}", "error")
+        
+    return redirect(url_for("parent.rewards_page"))

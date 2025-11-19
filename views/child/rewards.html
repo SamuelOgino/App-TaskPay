@@ -1,0 +1,265 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Extrato e Loja</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_child.css') }}">
+    
+    <style>
+        /* 1. Card Azul do Extrato */
+        .balance-summary-card {
+            background: linear-gradient(135deg, #1e74e6, #0a58ca);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(30, 116, 230, 0.25);
+        }
+        .balance-label { font-size: 0.9rem; opacity: 0.9; margin-bottom: 4px; }
+        .balance-row { display: flex; align-items: baseline; gap: 10px; }
+        .balance-value { font-size: 2rem; font-weight: 800; }
+        .xp-tag { 
+            background: rgba(255,255,255,0.2); 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+        }
+
+        /* 2. Histórico de Tarefas */
+        .history-section { margin-bottom: 30px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .section-header h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
+        .see-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600; opacity: 0.6; cursor: default; }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .task-icon-circle {
+            width: 40px; height: 40px;
+            background: #e0f2fe;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .task-details { flex: 1; }
+        .task-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+        .task-date { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+        .task-value { font-weight: 700; color: var(--success); font-size: 0.95rem; }
+
+        /* 3. Loja de Recompensas (Área Amarela) */
+        .shop-section { margin-top: 20px; }
+        .shop-container {
+            background-color: #fefce8; /* Fundo amarelo claro */
+            border: 1px solid #fef08a;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .shop-header { margin-bottom: 16px; }
+        .shop-points { font-size: 1.5rem; font-weight: 800; color: #ca8a04; margin: 4px 0; }
+        .shop-desc { font-size: 0.85rem; color: #854d0e; line-height: 1.4; }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 Colunas */
+            gap: 10px;
+        }
+        .reward-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .reward-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; line-height: 1.3; }
+        .reward-cost { font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; }
+        
+        .btn-redeem {
+            background: #fbbf24; /* Botão Amarelo */
+            color: #78350f;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-redeem:hover { background: #f59e0b; }
+        .btn-redeem:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="phone">
+
+        <header class="app-header">
+            {{ flash_messages() }}
+            
+            <!-- Botão de Voltar -->
+            <a href="{{ url_for('child.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            
+            <!-- LOGO PADRÃO (TaskPay) -->
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>TaskPay</span>
+            </div>
+            
+            <!-- Espaço vazio para manter a logo centralizada -->
+            <div style="width: 24px;"></div>
+        </header>
+
+        <main class="content-area">
+            {{ flash_messages() }}
+
+            <div class="section-header" style="margin-top: 10px;">
+                <h3>Extrato de Mesada</h3>
+                <span style="font-size: 0.8rem; color: var(--muted);">
+                    {{ now.strftime('%B %Y') if now else 'Atual' }}
+                </span>
+            </div>
+
+            <div class="balance-summary-card">
+                <div class="balance-label">Saldo disponível</div>
+                <div class="balance-row">
+                    <div class="balance-value">R$ {{ "%.2f"|format(saldo_atual|float) }}</div>
+                    <div class="xp-tag">+ {{ xp_atual }} XP</div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="section-header">
+                    <h3>Meus Pedidos</h3>
+                    </div>
+
+                {% if historico_resgates %}
+                    {% for resgate in historico_resgates %}
+                    <div class="history-item" style="justify-content: space-between;">
+                        
+                        <div style="display: flex; align-items: center;">
+                            <div class="task-icon-circle" style="background: #fef9c3; color: #ca8a04;">
+                                <i class="fa-solid fa-gift"></i>
+                            </div>
+                            <div class="task-details">
+                                <div class="task-name">{{ resgate.recompensa.titulo }}</div>
+                                
+                                <div style="margin-top: 4px;">
+                                    {% if resgate.status == 'PENDING' %}
+                                        <span style="background: #fef08a; color: #854d0e; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                            Aguardando
+                                        </span>
+                                    {% elif resgate.status == 'DELIVERED' %}
+                                        <span style="background: #dcfce7; color: #166534; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                            Entregue
+                                        </span>
+                                    {% elif resgate.status == 'REJECTED' %}
+                                        <span style="background: #fee2e2; color: #991b1b; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                            Cancelado / Reembolsado
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if resgate.status == 'REJECTED' %}
+                            <div class="task-value" style="color: #16a34a;">
+                                + {{ resgate.xpPago }} XP
+                            </div>
+                        {% else %}
+                            <div class="task-value" style="color: #ca8a04;">
+                                - {{ resgate.xpPago }} XP
+                            </div>
+                        {% endif %}
+
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 20px; color: var(--muted); font-size: 0.9rem; background: #fff; border-radius: 12px; border: 1px solid var(--border);">
+                        Nenhum pedido recente.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="shop-section">
+                <div class="section-header">
+                    <h3>Loja de Recompensas</h3>
+                </div>
+
+                <div class="shop-container">
+                    <div class="shop-header">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #854d0e;">Seus pontos</div>
+                        <div class="shop-points">{{ xp_atual }} XP</div>
+                        <div class="shop-desc">Troque seus XP's por recompensas especiais!</div>
+                    </div>
+
+                    <div class="rewards-grid">
+                        {% if recompensas %}
+                            {% for item in recompensas %}
+                            <div class="reward-card">
+                                <div>
+                                    <div class="reward-title">{{ item.titulo }}</div>
+                                    <div class="reward-cost">{{ item.custoXP }} XP</div>
+                                </div>
+                                
+                                <form action="{{ url_for('child.redeem_reward', recompensa_id=item.id) }}" method="POST">
+                                    <button type="submit" class="btn-redeem" 
+                                        {% if xp_atual < item.custoXP %}disabled{% endif %}>
+                                        {% if xp_atual < item.custoXP %}
+                                            Falta XP
+                                        {% else %}
+                                            Resgatar
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="grid-column: span 2; text-align: center; color: #854d0e; font-size: 0.9rem; padding: 10px;">
+                                Nenhuma recompensa disponível no momento.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="app-footer-nav">
+            <a href="{{ url_for('child.home') }}" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            <a href="{{ url_for('child.tasks_page') }}" class="nav-item"> 
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tarefas</span>
+            </a>
+            <a href="{{ url_for('child.rewards_page') }}" class="nav-item active">
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            <a href="{{ url_for('child.profile_page') }}" class="nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+
+    </div>
+    <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+</body>
+</html>

@@ -254,3 +254,71 @@ html, body {
   border: 1px solid #bbf7d0;
   color: #064e3b;
 }
+
+/* Estilos para a lista de histórico */
+.reward-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 10px;
+}
+
+.reward-info {
+    flex: 1;
+}
+
+.meta-text {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 4px 0;
+}
+
+/* Container dos botões */
+.reward-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Botão Base */
+.btn-action {
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+}
+
+.btn-action:hover {
+    opacity: 0.9;
+}
+
+/* Cor Verde para Entregar */
+.btn-action.approve {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Cor Vermelha para Rejeitar */
+.btn-action.reject {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Badge de status */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #eee;
+    color: #666;
+}
+.status-badge.pending { background: #fef9c3; color: #854d0e; }
+.status-badge.delivered { background: #dcfce7; color: #166534; }
+.status-badge.rejected { background: #fee2e2; color: #991b1b; text-decoration: line-through; }

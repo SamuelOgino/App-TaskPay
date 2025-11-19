@@ -67,20 +67,49 @@
 
       <div class="card">
         <h3 style="font-weight:700;margin-bottom:12px">Recompensas Resgatadas</h3>
+        
         {% for h in historico %}
-          <div class="reward-item">
-            <div>
-              <div class="title">{{ h.recompensa.titulo if h.recompensa else 'Recompensa' }}</div>
-              <div class="cost">Resgatado por {{ h.membro.usuario.nome }} • {{ h.xpPago }} XP</div>
+          <div class="reward-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+            
+            <div style="flex: 1;">
+              <div class="title" style="font-weight: 700;">{{ h.recompensa.titulo if h.recompensa else 'Recompensa' }}</div>
+              <div class="cost" style="font-size: 0.85rem; color: var(--muted);">
+                  Resgatado por <strong>{{ h.membro.usuario.nome }}</strong> • {{ h.xpPago }} XP
+              </div>
+              
+              </div>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+                
+                {% if h.status == 'PENDING' %}
+                    <a href="{{ url_for('parent.deliver_reward', resgate_id=h.id) }}" 
+                       onclick="return confirm('Confirmar entrega?');"
+                       style="background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #bbf7d0;">
+                       <i class="fa-solid fa-check"></i>
+                    </a>
+
+                    <a href="{{ url_for('parent.reject_reward', resgate_id=h.id) }}" 
+                       onclick="return confirm('Rejeitar e devolver XP?');"
+                       style="background-color: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #fecaca;">
+                       <i class="fa-solid fa-xmark"></i>
+                    </a>
+
+                {% else %}
+                    <span class="badge" style="font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background-color: #f3f4f6; color: #6b7280;">
+                        {{ h.status }}
+                    </span>
+                {% endif %}
+                
             </div>
-            <span class="badge">{{ h.status }}</span>
+
           </div>
         {% else %}
           <div class="reward-item">
-            <div>Sem resgates no histórico</div>
+            <div style="color: var(--muted); text-align: center; padding: 20px;">Sem resgates no histórico</div>
           </div>
         {% endfor %}
       </div>
+
     </main>
 
     <footer class="app-footer-nav">
