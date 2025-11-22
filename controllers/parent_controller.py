@@ -733,3 +733,7 @@ def reject_reward(resgate_id):
         flash(f"Erro: {e}", "error")
         
     return redirect(url_for("parent.rewards_page"))
+
+@bp.get("/plans")
+def plans_page():
+    return render_template("parent/plans.html")

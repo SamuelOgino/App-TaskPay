@@ -1,0 +1,138 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Planos e Assinatura</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plan_parent.css') }}">
+</head>
+<body>
+
+<div class="phone">
+
+    <!-- HEADER -->
+    <header class="app-header">
+        <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+        <div class="logo">
+            <i class="fa-solid fa-list"></i>
+            <span>TaskPay</span>
+        </div>
+        <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-user"></i></a>
+    </header>
+
+    <!-- MAIN -->
+    <main class="content-area">
+
+        <div class="page-title-area">
+            <h2 class="page-title">Planos e Assinatura</h2>
+            <p class="subtitle">Escolha o plano ideal para sua família</p>
+        </div>
+
+        <!-- PLANO ATUAL -->
+        <section class="card plan-card current">
+            <h3 class="plan-name">Seu plano atual: <span class="tag-free">FREE</span></h3>
+            <p class="price-free">R$ 0,00 / mês</p>
+
+            <ul class="plan-list">
+                <li><i class="fa-solid fa-circle-check"></i> 1 pai + 1 filho</li>
+                <li><i class="fa-solid fa-circle-check"></i> Tarefas limitadas</li>
+                <li><i class="fa-solid fa-circle-check"></i> Envio de fotos</li>
+                <li><i class="fa-solid fa-circle-check"></i> Aprovação parental</li>
+                <li><i class="fa-solid fa-circle-check"></i> Histórico básico</li>
+            </ul>
+
+            <button class="btn disabled" disabled>Plano Atual</button>
+        </section>
+
+        <!-- PLANO PRO -->
+        <section class="card plan-card pro">
+            <div class="badge-popular">MAIS ESCOLHIDO</div>
+
+            <h3 class="plan-name">TaskPay PRO</h3>
+            <p class="price-month">R$ 9,90/mês</p>
+            <p class="price-annual">ou R$ 99,00/ano (economize 15%)</p>
+
+            <ul class="plan-list">
+                <li><i class="fa-solid fa-fire"></i> Até 5 filhos</li>
+                <li><i class="fa-solid fa-chart-line"></i> Relatórios completos</li>
+                <li><i class="fa-solid fa-bullseye"></i> Metas financeiras</li>
+                <li><i class="fa-solid fa-gift"></i> Loja de recompensas</li>
+                <li><i class="fa-solid fa-scroll"></i> Streaks e conquistas</li>
+                <li><i class="fa-solid fa-brain"></i> Mini-aulas financeiras</li>
+                <li><i class="fa-solid fa-user-astronaut"></i> Personalização de avatar</li>
+                <li><i class="fa-solid fa-headset"></i> Suporte prioritário</li>
+            </ul>
+
+            <button class="btn primary">Assinar PRO</button>
+        </section>
+
+        <!-- COMPARAÇÃO -->
+        <section class="card comparison-card">
+            <h3 class="section-title">Comparação de planos</h3>
+
+            <table class="plans-table">
+                <tr><th>Recurso</th><th>FREE</th><th>PRO</th></tr>
+                <tr><td>Tarefas ilimitadas</td><td>✔</td><td>✔</td></tr>
+                <tr><td>1 filho</td><td>✔</td><td>—</td></tr>
+                <tr><td>Até 5 filhos</td><td>—</td><td>✔</td></tr>
+                <tr><td>Loja de recompensas</td><td>—</td><td>✔</td></tr>
+                <tr><td>Relatórios completos</td><td>—</td><td>✔</td></tr>
+                <tr><td>Streaks e conquistas</td><td>—</td><td>✔</td></tr>
+            </table>
+        </section>
+
+        <!-- FAQ -->
+        <section class="card faq-card">
+            <h3 class="section-title">Perguntas frequentes</h3>
+
+            <details class="faq-item">
+                <summary>Posso cancelar quando quiser?</summary>
+                <p>Sim. Cancelamento imediato.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Existe período de teste?</summary>
+                <p>Sim! 7 dias gratuitos no PRO.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Perco dados ao mudar de plano?</summary>
+                <p>Não. Todo histórico é preservado.</p>
+            </details>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta-final">
+            <h3>Potencialize o TaskPay na sua família</h3>
+            <p>Aprendizado financeiro + organização + autonomia</p>
+            <button class="btn primary large">Assinar PRO agora</button>
+        </div>
+
+    </main>
+
+    <footer class="app-footer-nav">
+            <a href="{{ url_for('parent.home') }}" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Início</span>
+            </a>
+            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tarefas</span>
+            </a>
+            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+                <i class="fa-solid fa-gift"></i>
+                <span>Recompensas</span>
+            </a>
+            <a href="{{ url_for('parent.profile_page') }}" class="nav-item active">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+
+</div>
+
+</body>
+</html>
