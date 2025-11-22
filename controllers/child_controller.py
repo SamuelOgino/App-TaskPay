@@ -398,6 +398,7 @@ def submit_task_photo(tarefa_id):
         flash("Você precisa selecionar um arquivo de foto.", "error")
         return redirect(url_for("child.tasks_page"))
 
+
     try:
         # 1. Salvar a foto (sem mudanças)
         nome_seguro = secure_filename(foto.filename)
@@ -408,13 +409,16 @@ def submit_task_photo(tarefa_id):
         foto.save(caminho_salvar)
         db_path = os.path.join('uploads', 'submissions', nome_final).replace("\\", "/")
 
+
         # 2. Mude o status da tarefa
         tarefa.status = TaskStatus.INATIVA
         
+
         # --- INÍCIO DA CORREÇÃO ---
         # 3. Verifica se já existe uma submissão (rejeitada)
         submissao = Submissao.query.filter_by(tarefa_id=tarefa.id).first()
         
+
         if submissao:
             # Se já existe, ATUALIZA ela com a nova foto e status
             submissao.status = SubmissionStatus.PENDING
@@ -472,7 +476,6 @@ def rewards_page():
     
     # Define o limite de tempo (Agora - 36 horas)
     limite_tempo = datetime.utcnow() - timedelta(hours=36)
-    
     historico_resgates = db.session.query(ResgateRecompensa).filter(
         ResgateRecompensa.membro_id == membro.id,
         or_(
@@ -488,7 +491,6 @@ def rewards_page():
     ).order_by(ResgateRecompensa.criadoEm.desc()).all()
     
     # ---------------------------------------------------------
-    
     # Lógica de Filtro da Loja (Mantida igual à anterior)
     resgates_familia = db.session.query(ResgateRecompensa.recompensa_id)\
         .join(Membro, ResgateRecompensa.membro_id == Membro.id)\

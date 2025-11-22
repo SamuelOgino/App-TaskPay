@@ -5,17 +5,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # --- 1. NOVAS IMPORTAÇÕES ---
 from models.models import Usuario, Familia, Membro, Role # Importe suas classes!
 from extensions import db # Importe o 'db'
-
-# (A linha "from models.user_model..." foi removida)
-
-# --- 2. CRIAÇÃO DO BLUEPRINT (isso continua igual) ---
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 # ===== LOGIN =====
 @bp.get("/login")
 def login_page():
     """Tela inicial de login (pais)."""
-    return render_template("login.html") # (Assumindo que este é o 'shared/login.html' da sua 1ª imagem)
+    return render_template("login.html") 
 
 @bp.get("/login/child")
 def login_child_page():
@@ -36,6 +32,7 @@ def login_submit():
 
     # --- 3. LÓGICA DE LOGIN COM BANCO DE DADOS ---
     
+
     # Valida campos
     if not email or password is None:
         flash("Informe e-mail e senha.", "error")
@@ -71,6 +68,7 @@ def login_submit():
     else:
         return redirect(url_for("parent.home"))
 
+
 # ===== LOGOUT =====
 @bp.get("/logout")
 def logout():
@@ -78,11 +76,13 @@ def logout():
     session.clear()
     return redirect(url_for("auth.login_page"))
 
+
 # ===== REGISTER =====
 @bp.get("/register")
 def register_page():
     """Exibe tela de cadastro."""
     return render_template("register.html")
+
 
 @bp.post("/register")
 def register_submit():
@@ -92,6 +92,7 @@ def register_submit():
     password = request.form.get("password") or ""
     role = (request.form.get("role") or "PARENT").strip().upper()
     parent_email = (request.form.get("parent_email") or "").strip().lower() if role == "CHILD" else ""
+
 
     if not name or not email or not password:
         flash("Nome, e-mail e senha são obrigatórios.", "error")

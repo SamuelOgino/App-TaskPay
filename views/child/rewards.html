@@ -6,104 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskPay - Extrato e Loja</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home_child.css') }}">
     
-    <style>
-        /* 1. Card Azul do Extrato */
-        .balance-summary-card {
-            background: linear-gradient(135deg, #1e74e6, #0a58ca);
-            color: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 20px rgba(30, 116, 230, 0.25);
-        }
-        .balance-label { font-size: 0.9rem; opacity: 0.9; margin-bottom: 4px; }
-        .balance-row { display: flex; align-items: baseline; gap: 10px; }
-        .balance-value { font-size: 2rem; font-weight: 800; }
-        .xp-tag { 
-            background: rgba(255,255,255,0.2); 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.9rem; 
-            font-weight: 600; 
-        }
-
-        /* 2. Histórico de Tarefas */
-        .history-section { margin-bottom: 30px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .section-header h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
-        .see-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600; opacity: 0.6; cursor: default; }
-
-        .history-item {
-            display: flex;
-            align-items: center;
-            background: white;
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-        .task-icon-circle {
-            width: 40px; height: 40px;
-            background: #e0f2fe;
-            color: var(--primary);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        .task-details { flex: 1; }
-        .task-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
-        .task-date { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-        .task-value { font-weight: 700; color: var(--success); font-size: 0.95rem; }
-
-        /* 3. Loja de Recompensas (Área Amarela) */
-        .shop-section { margin-top: 20px; }
-        .shop-container {
-            background-color: #fefce8; /* Fundo amarelo claro */
-            border: 1px solid #fef08a;
-            border-radius: 20px;
-            padding: 20px;
-        }
-        .shop-header { margin-bottom: 16px; }
-        .shop-points { font-size: 1.5rem; font-weight: 800; color: #ca8a04; margin: 4px 0; }
-        .shop-desc { font-size: 0.85rem; color: #854d0e; line-height: 1.4; }
-
-        .rewards-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 Colunas */
-            gap: 10px;
-        }
-        .reward-card {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-        }
-        .reward-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; line-height: 1.3; }
-        .reward-cost { font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; }
-        
-        .btn-redeem {
-            background: #fbbf24; /* Botão Amarelo */
-            color: #78350f;
-            border: none;
-            padding: 8px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            width: 100%;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-redeem:hover { background: #f59e0b; }
-        .btn-redeem:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rewards_childs.css') }}">
 </head>
 <body>
 
@@ -112,16 +18,13 @@
         <header class="app-header">
             {{ flash_messages() }}
             
-            <!-- Botão de Voltar -->
             <a href="{{ url_for('child.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
             
-            <!-- LOGO PADRÃO (TaskPay) -->
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
             </div>
             
-            <!-- Espaço vazio para manter a logo centralizada -->
             <div style="width: 24px;"></div>
         </header>
 
@@ -146,7 +49,7 @@
             <div class="history-section">
                 <div class="section-header">
                     <h3>Meus Pedidos</h3>
-                    </div>
+                </div>
 
                 {% if historico_resgates %}
                     {% for resgate in historico_resgates %}
