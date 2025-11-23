@@ -390,73 +390,84 @@ def approve_submission(submissao_id):
     return redirect(url_for("parent.tasks_page"))
 
 # ... (cole isto no lugar da sua rota @bp.get("/profile") antiga) ...
-
 @bp.get("/profile")
 def profile_page():
     """Exibe a página de Perfil do PAI."""
     guard = _require_parent()
     if guard: return guard
     
-    # 1. Busca o PAI logado
     parent_member = _current_parent_member()
     if not parent_member:
         flash("Sessão inválida. Faça login novamente.", "error")
         return redirect(url_for("auth.login_page"))
     
-    # (O 'usuario' é o PAI)
     usuario = parent_member.usuario
-    
-    # 2. Busca todos os filhos da mesma família
     filhos = Membro.query.filter_by(familia_id=parent_member.familia_id, role=Role.CHILD).all()
     
-    # --- MUDANÇA PRINCIPAL: Buscar os dados de CADA filho ---
-    # 3. Processa os dados de cada filho (para o protótipo 'Luke')
-    filhos_data = [] # <--- MUDANÇA (era uma query, agora é uma lista vazia)
-    for filho in filhos: # <--- MUDANÇA (inicia o loop)
-        # Garante que o filho tem progresso e carteira (cria se não tiver)
-        progresso = filho.progresso
-        if not progresso:
-            progresso = Progresso(membro_id=filho.id, xp=0, nivel=1) # (Adicionado xp=0, nivel=1)
-            db.session.add(progresso)
+    filhos_data = [] 
+    for filho in filhos:
+        # Garante carteira e progresso
+        progresso = filho.progresso or Progresso(membro_id=filho.id, xp=0, nivel=1)
+        if not filho.progresso: db.session.add(progresso)
         
-        carteira = filho.carteira
-        if not carteira:
-            carteira = Carteira(membro_id=filho.id, saldo=0)
-            db.session.add(carteira)
+        carteira = filho.carteira or Carteira(membro_id=filho.id, saldo=0)
+        if not filho.carteira: db.session.add(carteira)
         
-        # Calcula as tarefas concluídas (Como no protótipo)
+        # 1. Tarefas Concluídas
         tarefas_concluidas = Submissao.query.join(Tarefa).filter(
             Tarefa.executor_id == filho.id,
             Submissao.status == SubmissionStatus.APPROVED
         ).count()
         
-        # Calcula o "foguinho" (streak)
-        is_streak_active = False
-        streak_dias = 0 # (Deixamos em 0 por agora)
-        if progresso.ultimaTarefaEm:
-            agora = datetime.utcnow()
-            limite_streak = progresso.ultimaTarefaEm + timedelta(hours=24)
-            if agora < limite_streak:
-                is_streak_active = True
-                # (A lógica de 'dias seguidos' é mais complexa, fica para depois)
-
+        # --- MUDANÇA AQUI: CALCULAR O TOTAL GANHO (Sem descontar pagamentos) ---
+        total_ganho_bruto = db.session.query(func.sum(Transacao.valor)).filter(
+            Transacao.carteira_id == carteira.id,
+            # Soma apenas créditos de Tarefa e Mesada (ignora pagamentos/saques)
+            Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
+        ).scalar() or 0.0
         
-        filhos_data.append({ # <--- MUDANÇA (adiciona um DICIONÁRIO à lista)
-            "membro": filho, # Para o nome e foto
+        # 3. Lógica do Streak (Foguinho)
+        is_streak_active = False
+        streak_dias = 0
+        submissoes_aprovadas = db.session.query(Submissao.aprovadaEm).join(Tarefa).filter(
+            Tarefa.executor_id == filho.id,
+            Submissao.status == SubmissionStatus.APPROVED
+        ).order_by(Submissao.aprovadaEm.desc()).all()
+        
+        datas_unicas = sorted(list(set([s.aprovadaEm.date() for s in submissoes_aprovadas if s.aprovadaEm])), reverse=True)
+        
+        if datas_unicas:
+            hoje = datetime.utcnow().date()
+            ontem = hoje - timedelta(days=1)
+            ultima_data = datas_unicas[0]
+            
+            if ultima_data == hoje or ultima_data == ontem:
+                is_streak_active = True
+                streak_dias = 1
+                data_referencia = ultima_data
+                for i in range(1, len(datas_unicas)):
+                    proxima_data = datas_unicas[i]
+                    if (data_referencia - proxima_data).days == 1:
+                        streak_dias += 1
+                        data_referencia = proxima_data
+                    elif (data_referencia - proxima_data).days > 1:
+                        break
+
+        filhos_data.append({
+            "membro": filho,
             "tarefas_concluidas": tarefas_concluidas,
-            "saldo": carteira.saldo,
+            "saldo": carteira.saldo,         # Saldo real (usado internamente, se precisar)
+            "total_ganho": total_ganho_bruto, # NOVO CAMPO: Valor Bruto
             "is_streak_active": is_streak_active,
             "streak_dias": streak_dias
         })
     
-    # 4. Salva no banco (caso algum filho tenha precisado de uma nova carteira/progresso)
     db.session.commit()
 
-    # 5. Envia os dados para o novo HTML
     return render_template(
         "parent/profile.html",
-        usuario=usuario,           # O PAI
-        filhos_data=filhos_data    # A LISTA DE FILHOS (agora é uma lista de dicionários)
+        usuario=usuario,
+        filhos_data=filhos_data
     )
 
 # marcar notificações
@@ -737,3 +748,109 @@ def reject_reward(resgate_id):
 @bp.get("/plans")
 def plans_page():
     return render_template("parent/plans.html")
+
+# --- NOVAS ROTAS: DETALHES FINANCEIROS DO FILHO ---
+
+@bp.get("/child/<child_id>")
+def child_detail(child_id):
+    """Exibe detalhes financeiros de um filho específico."""
+    guard = _require_parent()
+    if guard: return guard
+
+    parent_member = _current_parent_member()
+    filho = Membro.query.get(child_id)
+
+    # Segurança: verifica se o filho existe e pertence à mesma família
+    if not filho or filho.familia_id != parent_member.familia_id:
+        flash("Filho não encontrado ou permissão negada.", "error")
+        return redirect(url_for("parent.profile_page"))
+
+    carteira = filho.carteira
+    if not carteira:
+        carteira = Carteira(membro_id=filho.id, saldo=0)
+        db.session.add(carteira)
+        db.session.commit()
+
+    # 1. CÁLCULOS FINANCEIROS
+    
+    # A. Total Prometido (Tudo que ele ganhou de tarefas + mesada na vida toda)
+    total_ganho = db.session.query(func.sum(Transacao.valor)).filter(
+        Transacao.carteira_id == carteira.id,
+        Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
+    ).scalar() or 0.0
+
+    # B. Total Pago (Tudo que o pai já pagou em dinheiro/pix - DEBIT_PAYMENT)
+    # Vamos criar um tipo 'DEBIT_PAYMENT' para representar "Saque/Pagamento do Pai"
+    total_pago_historico = db.session.query(func.sum(Transacao.valor)).filter(
+        Transacao.carteira_id == carteira.id,
+        Transacao.tipo == 'DEBIT_PAYMENT' 
+    ).scalar() or 0.0
+
+    # C. Saldo Atual (O que o pai deve HOJE)
+    saldo_devedor = carteira.saldo
+
+    # 2. Histórico Recente (Últimas 5 movimentações)
+    historico = Transacao.query.filter_by(carteira_id=carteira.id)\
+        .order_by(Transacao.criadoEm.desc())\
+        .limit(5).all()
+
+    return render_template(
+        "parent/child_detail.html",
+        filho=filho,
+        total_ganho=total_ganho,
+        total_pago_historico=total_pago_historico,
+        saldo_devedor=saldo_devedor,
+        historico=historico
+    )
+
+@bp.post("/child/<child_id>/pay")
+def pay_child_submit(child_id):
+    """Registra um pagamento (Pix/Dinheiro) feito ao filho."""
+    guard = _require_parent()
+    if guard: return guard
+
+    parent_member = _current_parent_member()
+    filho = Membro.query.get(child_id)
+
+    if not filho or filho.familia_id != parent_member.familia_id:
+        flash("Erro de permissão.", "error")
+        return redirect(url_for("parent.profile_page"))
+
+    valor_str = request.form.get("valor_pagamento")
+    try:
+        valor_pagar = Decimal(valor_str.replace(",", "."))
+    except:
+        flash("Valor inválido.", "error")
+        return redirect(url_for("parent.child_detail", child_id=child_id))
+
+    carteira = filho.carteira
+
+    if valor_pagar <= 0:
+        flash("O valor deve ser positivo.", "error")
+    elif valor_pagar > carteira.saldo:
+        flash(f"Você não pode pagar mais do que deve (R$ {carteira.saldo}).", "error")
+    else:
+        # 1. Abate do saldo
+        carteira.saldo -= valor_pagar
+
+        # 2. Registra a transação
+        transacao = Transacao(
+            tipo='DEBIT_PAYMENT', # Tipo novo: Pagamento feito pelo pai
+            valor=valor_pagar,
+            descricao="Pagamento de Mesada/Tarefas (Saque)",
+            carteira_id=carteira.id
+        )
+        db.session.add(transacao)
+
+        # 3. Notifica o filho
+        notif = Notificacao(
+            tipo="PAGAMENTO_RECEBIDO",
+            mensagem=f"Seu responsável te pagou R$ {valor_pagar:.2f}!",
+            usuario_id=filho.usuario_id
+        )
+        db.session.add(notif)
+        
+        db.session.commit()
+        flash(f"Pagamento de R$ {valor_pagar:.2f} registrado com sucesso!", "success")
+
+    return redirect(url_for("parent.child_detail", child_id=child_id))

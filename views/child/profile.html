@@ -29,8 +29,8 @@
             <div class="profile-header">
                 
                 <div class="profile-pic-container">
-                    <img src="{{ url_for('static', filename='uploads/' + membro.usuario.avatarUrl) if membro.usuario.avatarUrl else 'https://via.placeholder.com/120' }}" alt="Foto do Perfil" class="profile-pic">
-                    
+                    <img src="{{ url_for('static', filename='uploads/' + membro.usuario.avatarUrl) if membro.usuario.avatarUrl else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="Foto do Perfil" class="profile-pic">
+
                     <a href="{{ url_for('child.edit_profile_page') }}" class="edit-pic-button">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
