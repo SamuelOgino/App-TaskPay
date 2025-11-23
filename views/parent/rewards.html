@@ -17,9 +17,6 @@
       {{ flash_messages() }}
       <a href="{{ url_for('parent.home') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
       <div class="logo"><i class="fa-solid fa-list"></i><span>TaskPay</span></div>
-      
-      <!-- <a href="#"><i class="fa-solid fa-user"></i></a> -->
-      
     </header>
 
     <main class="content-area">
@@ -35,7 +32,7 @@
           {% for k in xp_por_filho %}
             <div class="kid-card">
               
-              <img src="{{ url_for('static', filename='uploads/' + k.avatar) if k.avatar else 'https://via.placeholder.com/64' }}" alt="{{k.nome}}">
+              <img src="{{ url_for('static', filename='uploads/' + k.avatar) if k.avatar else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="{{k.nome}}">
               
               <div style="flex:1">
                 <div style="font-weight:700">{{ k.nome }}</div>
@@ -56,8 +53,7 @@
               <div class="title">{{ r.titulo }}</div>
               <div class="cost">{{ r.custoXP }} XP</div>
             </div>
-            <a class="link" href="#">Detalhes</a>
-          </div>
+            </div>
         {% else %}
           <div class="reward-item">
             <div>Sem recompensas ativas</div>
@@ -69,7 +65,7 @@
         <h3 style="font-weight:700;margin-bottom:12px">Recompensas Resgatadas</h3>
         
         {% for h in historico %}
-          <div class="reward-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+          <div class="reward-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #eee;">
             
             <div style="flex: 1;">
               <div class="title" style="font-weight: 700;">{{ h.recompensa.titulo if h.recompensa else 'Recompensa' }}</div>

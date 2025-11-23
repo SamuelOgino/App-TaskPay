@@ -13,14 +13,13 @@
 
 <div class="phone">
 
-    <!-- HEADER -->
     <header class="app-header">
-        <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+        {{ flash_messages() }}
+        <a href="{{ url_for('parent.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
         <div class="logo">
             <i class="fa-solid fa-list"></i>
             <span>TaskPay</span>
         </div>
-        <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-user"></i></a>
     </header>
 
     <!-- MAIN -->

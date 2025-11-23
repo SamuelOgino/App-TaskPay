@@ -1,0 +1,83 @@
+{% from 'shared/_macros.html' import flash_messages %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay - Detalhes Financeiros</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_parent.css') }}">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/child_detail.css') }}">
+</head>
+<body>
+    <div class="phone">
+        <header class="app-header">
+            <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            
+            <div class="logo">
+                <i class="fa-solid fa-list"></i>
+                <span>TaskPay</span>
+            </div>
+            
+            <div style="width: 20px;"></div>
+        </header>
+
+        <main class="content-area">
+            {{ flash_messages() }}
+
+            <div class="finance-card">
+                <div class="finance-title">
+                    Você deve atualmente a <br> 
+                    <strong style="font-size: 1.1rem; color: #fff;">{{ filho.usuario.nome }}</strong>
+                </div>
+                <div class="finance-value">R$ {{ "%.2f"|format(saldo_devedor|float) }}</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="mini-card">
+                    <span class="mini-label">Total Ganho (Tarefas)</span>
+                    <span class="mini-val green">R$ {{ "%.2f"|format(total_ganho|float) }}</span>
+                </div>
+                <div class="mini-card">
+                    <span class="mini-label">Total Já Pago</span>
+                    <span class="mini-val">R$ {{ "%.2f"|format(total_pago_historico|float) }}</span>
+                </div>
+            </div>
+
+            <div class="pay-box">
+                <h3 style="font-size: 1rem; margin:0;">Realizar Pagamento</h3>
+                <p style="font-size: 0.85rem; color:#666; margin-top:5px;">Simule que você entregou o dinheiro ou fez um Pix.</p>
+                
+                <form action="{{ url_for('parent.pay_child_submit', child_id=filho.id) }}" method="POST" class="pay-input-group">
+                    <input type="number" name="valor_pagamento" class="pay-input" placeholder="0,00" step="0.01" min="0.01" required>
+                    <button type="submit" class="btn-pay">Pagar</button>
+                </form>
+            </div>
+
+            <div class="history-list">
+                <h3 style="font-size: 1rem; margin-bottom:10px;">Últimas Movimentações</h3>
+                {% if historico %}
+                    {% for t in historico %}
+                    <div class="history-item">
+                        <div>
+                            <div class="h-desc">{{ t.descricao }}</div>
+                            <div class="h-date">{{ t.criadoEm.strftime('%d/%m %H:%M') }}</div>
+                        </div>
+                        <div class="h-val {% if t.tipo == 'DEBIT_PAYMENT' or t.tipo == 'DEBIT_REWARD' %}neg{% else %}pos{% endif %}">
+                            {% if t.tipo == 'DEBIT_PAYMENT' or t.tipo == 'DEBIT_REWARD' %}-{% else %}+{% endif %}
+                            R$ {{ "%.2f"|format(t.valor|float) }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:#999; text-align:center; font-size:0.9rem;">Nenhuma movimentação recente.</p>
+                {% endif %}
+            </div>
+
+        </main>
+        <script src="{{ url_for('static', filename='js/flash_me.js') }}"></script>
+    </div>
+</body>
+</html>

@@ -223,15 +223,21 @@ html, body {
 .child-list-section {
     margin-top: 24px;
 }
+/* Procure por .child-card e SUBSTITUA por isso: */
 .child-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;           /* <--- Mudou de GRID para FLEX */
+    flex-direction: column;  /* <--- Garante que fica um item embaixo do outro */
     gap: 12px;
-    align-items: center;
-    padding: 12px;
+    padding: 16px;
     text-decoration: none;
     color: var(--text);
-    transition: background-color 0.2s ease;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    position: relative;      /* <--- Importante para segurar a setinha no lugar */
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .child-card:hover {
     background-color: var(--bg-light-gray);
@@ -258,13 +264,12 @@ html, body {
     color: var(--muted);
 }
 .child-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-top: 12px;
-    /* Faz com que as estatísticas ocupem a linha toda */
-    grid-column: 1 / -1; /* Começa na linha 1, vai até -1 (o fim) */
-    grid-row: 2;
+    display: flex;             /* <--- Mudou de GRID para FLEX */
+    justify-content: space-between; /* <--- Espalha os itens (Esquerda, Meio, Direita) */
+    align-items: center;
+    margin-top: 4px;
+    padding-right: 24px;       /* <--- Dá um espaço para a setinha não cobrir o texto */
+    /* Removi as linhas de grid-column e grid-row antigas pois não precisa mais */
 }
 .stat-item {
     text-align: center;
@@ -294,8 +299,14 @@ html, body {
 .stat-item .value.streak.active i {
     color: var(--warning);
 }
+/* Procure por .arrow-icon e SUBSTITUA por isso: */
 .arrow-icon {
-    color: var(--primary);
+    position: absolute;  /* <--- Fixa a posição */
+    right: 16px;         /* <--- Cola na direita */
+    top: 50%;            /* <--- Centraliza verticalmente */
+    transform: translateY(-50%); /* <--- Ajuste fino do centro */
+    color: var(--muted);
+    opacity: 0.5;
     font-size: 0.9rem;
 }
 
