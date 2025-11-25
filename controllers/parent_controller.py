@@ -1,4 +1,3 @@
-# controllers/parent_controller.py
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -7,9 +6,6 @@ from uuid import uuid4
 import os
 from werkzeug.utils import secure_filename
 from sqlalchemy.sql import func, or_
-
-
-# --- Importação ATUALIZADA (com Submissao, Progresso, etc.) ---
 from models.models import Membro, Role, Tarefa, Notificacao, TaskStatus, Recompensa, ResgateRecompensa, Submissao, SubmissionStatus, Progresso, Carteira, Usuario, Transacao, TransactionType, ResgateStatus
 
 bp = Blueprint("parent", __name__, url_prefix="/parent")
@@ -24,70 +20,70 @@ def _current_parent_member():
     if not uid: return None
     return Membro.query.filter_by(usuario_id=uid, role=Role.PARENT).first()
 
-# Em controllers/parent_controller.py
-
 @bp.get("/home")
 def home():
-    # 1. Verifica se é um PAI logado
+    # ... (Verificações iniciais de login continuam iguais) ...
     guard = _require_parent()
     if guard: return guard
 
-    # 2. Busca o 'Membro' PAI no banco de dados
     parent_member = Membro.query.filter_by(usuario_id=session.get("user_id"), role=Role.PARENT).first()
-
-    # 3. Garante que o membro foi encontrado
     if not parent_member:
-        flash("Sessão de PAI inválida. Faça login novamente.", "error")
+        flash("Sessão de PAI inválida.", "error")
         return redirect(url_for("auth.login_page"))
 
-    # --- LÓGICA DO RESUMO FINANCEIRO (Como antes) ---
-    
-    # 4. Encontra os IDs de todos os filhos nesta família
     filhos = Membro.query.filter_by(familia_id=parent_member.familia_id, role=Role.CHILD).all()
     filhos_ids = [filho.id for filho in filhos]
     
-    # 5. Calcula o "Total Prometido" (Concluídas)
+    # --- CÁLCULOS FINANCEIROS ATUALIZADOS ---
+
+    # 1. Total Prometido (HISTÓRICO TOTAL DE GANHOS)
+    # Soma todas as transações de entrada (Tarefas e Mesadas) desde o início.
+    # NÃO subtrai o que já foi pago.
     total_prometido = 0.0
     if filhos_ids:
-        total_prometido = db.session.query(func.sum(Submissao.valorAprovado)).join(Tarefa).filter(
-            Tarefa.executor_id.in_(filhos_ids),
-            Submissao.status == SubmissionStatus.APPROVED
+        total_prometido = db.session.query(func.sum(Transacao.valor)).join(Carteira).filter(
+            Carteira.membro_id.in_(filhos_ids),
+            # Filtra apenas tipos de entrada de dinheiro
+            Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
         ).scalar() or 0.0
 
-    # 6. Calcula o "Total Pago" (Concluídas)
+    # 2. Total Pago (HISTÓRICO TOTAL DE PAGAMENTOS)
+    # Soma tudo que o pai já registrou como pago/sacado.
     total_pago = 0.0
+    if filhos_ids:
+        total_pago = db.session.query(func.sum(Transacao.valor)).join(Carteira).filter(
+            Carteira.membro_id.in_(filhos_ids),
+            Transacao.tipo == 'DEBIT_PAYMENT'
+        ).scalar() or 0.0
+
+    # --- Fim dos cálculos ---
     
+    # ... (O resto do código de tarefas pendentes e retorno do template continua igual) ...
     
-    # --- MUDANÇA AQUI: Buscar as Tarefas Pendentes ---
-    
-    # 7. Busca as tarefas que estão ATIVAS e atribuídas aos filhos
     tarefas_pendentes = []
     if filhos_ids:
         tarefas_pendentes = Tarefa.query.filter(
-            Tarefa.executor_id.in_(filhos_ids), # Tarefas dos filhos desta família
-            Tarefa.status == TaskStatus.ATIVA   # Tarefas que estão ATIVAS
-        ).order_by(Tarefa.prazo.asc()).all() # Ordenar pela mais próxima de vencer
+            Tarefa.executor_id.in_(filhos_ids),
+            Tarefa.status == TaskStatus.ATIVA
+        ).order_by(Tarefa.prazo.asc()).all()
 
-    # Busca submissões PENDING dos filhos desta família
     tarefas_para_avaliar = Submissao.query.join(Tarefa).filter(
         Tarefa.executor_id.in_(filhos_ids),
         Submissao.status == SubmissionStatus.PENDING
     ).order_by(Submissao.enviadaEm.asc()).all()
 
-    # 8. Envia tudo para o HTML
     return render_template(
         "parent/home.html", 
         parent_member=parent_member,
         total_prometido=total_prometido,
         total_pago=total_pago,
         tarefas_pendentes=tarefas_pendentes,
-        tarefas_para_avaliar=tarefas_para_avaliar# <-- ENVIANDO A NOVA LISTA DE TAREFAS
+        tarefas_para_avaliar=tarefas_para_avaliar
     )
 # ----------------------------------------------------------------
 
 @bp.get("/tasks/new")
 def new_task_page():
-    # ... (o resto do seu arquivo, sem mudanças) ...
     guard = _require_parent()
     if guard: return guard
     parent_member = Membro.query.filter_by(usuario_id=session.get("user_id"), role=Role.PARENT).first()
@@ -99,7 +95,6 @@ def new_task_page():
 
 @bp.post("/tasks")
 def create_task():
-    # ... (o resto do seu arquivo, sem mudanças) ...
     guard = _require_parent()
     if guard: return guard
     parent_member = Membro.query.filter_by(usuario_id=session.get("user_id"), role=Role.PARENT).first()
@@ -114,7 +109,6 @@ def create_task():
     exige_foto = True if request.form.get("exige_foto") == "on" else False
     prazo_str = (request.form.get("prazo") or "").strip()
     prioridade = request.form.get("prioridade") or None
-    # recorrencia = request.form.get("recorrencia") or None # <-- REMOVIDO (Passo 1)
     icone = request.form.get("icone") or None
     executor_id = request.form.get("executor_id") or None
 
@@ -162,7 +156,6 @@ def create_task():
         exigeFoto=exige_foto,
         prazo=prazo_dt,
         prioridade=prioridade,
-        # recorrencia=recorrencia, # <-- REMOVIDO
         icone=icone,
         criador_id=parent_member.id,
         executor_id=executor_id
@@ -255,14 +248,12 @@ def rewards_page():
 
 @bp.get("/rewards/new")
 def new_reward_page():
-    # ... (o resto do seu arquivo, sem mudanças) ...
     guard = _require_parent()
     if guard: return guard
     return render_template("parent/new_reward.html")
 
 @bp.post("/rewards")
 def create_reward():
-    # ... (o resto do seu arquivo, sem mudanças) ...
     guard = _require_parent()
     if guard: return guard
     parent_member = Membro.query.filter_by(usuario_id=session.get("user_id"), role=Role.PARENT).first()

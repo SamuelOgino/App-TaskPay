@@ -58,7 +58,6 @@ class Familia(db.Model):
     
     # Relacionamentos (1-para-N)
     membros = db.relationship('Membro', back_populates='familia', lazy=True)
-    convites = db.relationship('Convite', back_populates='familia', lazy=True)
     recompensas = db.relationship('Recompensa', back_populates='familia', lazy=True)
 
 # --- 3. Entidade Membro ---
@@ -214,22 +213,7 @@ class ResgateRecompensa(db.Model):
     membro = db.relationship("Membro", back_populates="resgates")
 
 
-# ... (resto das classes, Convite e Notificacao) ...
-# --- 11. Entidade Convite ---
-class Convite(db.Model):
-    __tablename__ = 'convite'
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    codigo = db.Column(db.String(20), unique=True, nullable=False)
-    expiraEm = db.Column(db.DateTime, nullable=False)
-    ativo = db.Column(db.Boolean, default=True, nullable=False)
-    
-    # Chave Estrangeira
-    familia_id = db.Column(db.String(36), db.ForeignKey('familia.id'), nullable=False)
-    
-    # Relacionamento
-    familia = db.relationship('Familia', back_populates='convites')
-
-# --- 12. Entidade Notificacao ---
+# --- 11. Entidade Notificacao ---
 class Notificacao(db.Model):
     __tablename__ = 'notificacao'
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)

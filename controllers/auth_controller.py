@@ -30,9 +30,6 @@ def login_submit():
     password = request.form.get("password") or ""
     role = (request.form.get("role") or "PARENT").strip().upper() # PARENT ou CHILD
 
-    # --- 3. LÓGICA DE LOGIN COM BANCO DE DADOS ---
-    
-
     # Valida campos
     if not email or password is None:
         flash("Informe e-mail e senha.", "error")
