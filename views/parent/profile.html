@@ -30,7 +30,7 @@
             <div class="profile-header-parent"> 
                 
                 <div class="profile-pic-container">
-                    <img src="{{ url_for('static', filename='uploads/' + usuario.avatarUrl) if usuario.avatarUrl else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="Foto do Perfil" class="profile-pic">
+                    <img src="{{ url_for('static', filename=usuario.avatarUrl) if usuario.avatarUrl else url_for('static', filename='img/icons/default_image.png') }}" alt="Foto do Perfil" class="profile-pic">
 
                     <a href="{{ url_for('parent.edit_profile_page') }}" class="edit-pic-button">
                         <i class="fa-solid fa-pencil"></i>
@@ -51,7 +51,7 @@
                     <a href="{{ url_for('parent.child_detail', child_id=filho_info.membro.id) }}" class="card child-card">
                         
                         <div class="child-info">
-                            <img src="{{ url_for('static', filename='uploads/' + filho_info.membro.usuario.avatarUrl) if filho_info.membro.usuario.avatarUrl else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="Foto do Filho" class="child-pic">
+                            <img src="{{ url_for('static', filename='uploads/' + filho_info.membro.usuario.avatarUrl) if filho_info.membro.usuario.avatarUrl else url_for('static', filename='img/icons/default_image.png') }}" alt="Foto do Filho" class="child-pic">
                             <div>
                                 <div class="child-name">{{ filho_info.membro.usuario.nome }}</div>
                             </div>
@@ -63,7 +63,7 @@
                                 <span class="value tasks">{{ filho_info.tarefas_concluidas }}</span>
                             </div>
                             <div class="stat-item">
-                                <span class="label">Saldo mesada</span>
+                                <span class="label">Total acumulado</span>
                                 <span class="value balance">R$ {{ "%.2f"|format(filho_info.total_ganho|float) }}</span>
                             </div>
                             <div class="stat-item">
