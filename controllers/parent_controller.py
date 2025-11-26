@@ -60,6 +60,8 @@ def home():
     
     # ... (O resto do código de tarefas pendentes e retorno do template continua igual) ...
     
+    # VCP06 - Visualizar Tarefas Pendentes:
+    # Lista tarefas ATIVAS dos filhos ordenadas por prazo.
     tarefas_pendentes = []
     if filhos_ids:
         tarefas_pendentes = Tarefa.query.filter(
@@ -82,6 +84,8 @@ def home():
     )
 # ----------------------------------------------------------------
 
+# VCP04 - Criar Tarefa: (e VCP07)
+# Recebe dados do formulário, valida, cria Tarefa e envia notificação ao filho.
 @bp.get("/tasks/new")
 def new_task_page():
     guard = _require_parent()
@@ -111,6 +115,9 @@ def create_task():
     prioridade = request.form.get("prioridade") or None
     icone = request.form.get("icone") or None
     executor_id = request.form.get("executor_id") or None
+    # VCP05 - Designar tarefa ao filho:
+    # O executor_id define qual filho receberá a tarefa.
+
 
     # --- INÍCIO DA VALIDAÇÃO (Passo 3) ---
     has_error = False
@@ -286,6 +293,9 @@ def create_reward():
     flash("Recompensa criada!", "success")
     return redirect(url_for("parent.rewards_page"))
 
+# VCP08 - Validar/Rejeitar Submissão:
+# Pai aprova (gera XP, adiciona saldo, registra transação)
+# ou rejeita (marca tarefa como INATIVA e notifica).
 @bp.get("/submission/approve/<submissao_id>")
 def approve_submission(submissao_id):
     guard = _require_parent()
@@ -324,12 +334,12 @@ def approve_submission(submissao_id):
             
         carteira_filho.saldo = (carteira_filho.saldo or 0) + tarefa.valorBase
         
-        # --- NOVA LINHA: ADICIONA O XP AO SALDO PARA GASTAR NA LOJA ---
+        # ADICIONA O XP AO SALDO PARA GASTAR NA LOJA
         # Supondo que 1 Real = 10 XP (ou use uma regra fixa como +100 XP por tarefa)
         xp_ganho = 100 # Defina quanto XP a tarefa vale
         membro_filho.saldoXP = (membro_filho.saldoXP or 0) + xp_ganho
-        
-
+        # VCP11 - Subir de nível:
+    # A cada aprovação o filho ganha XP; ao exceder 1000 XP o nível aumenta.
 
         # Cria o registro da transação para o extrato do filho
         transacao = Transacao(
@@ -339,14 +349,12 @@ def approve_submission(submissao_id):
             carteira_id=carteira_filho.id
         )
         db.session.add(transacao)
-        # --- FIM DA CORREÇÃO 1 ---
 
         if not progresso_filho: 
             progresso_filho = Progresso(membro_id=membro_filho.id)
             db.session.add(progresso_filho)
             
-        # --- CORREÇÃO 2: LÓGICA DE LEVEL UP (XP Fixo 1000) ---
-        
+        # LÓGICA DE LEVEL UP (XP Fixo 1000)
         # 1. Adiciona o XP ao total acumulativo
         progresso_filho.xp_total = (progresso_filho.xp_total or 0) + 100
         
@@ -362,7 +370,6 @@ def approve_submission(submissao_id):
             progresso_filho.nivel += 1
             # Zera a barra de XP (levando o excesso)
             progresso_filho.xp -= max_xp_nivel_atual
-        # --- FIM DA CORREÇÃO 2 ---
             
         notif = Notificacao(
             tipo="TAREFA_APROVADA",
@@ -395,6 +402,8 @@ def profile_page():
     usuario = parent_member.usuario
     filhos = Membro.query.filter_by(familia_id=parent_member.familia_id, role=Role.CHILD).all()
     
+    # VCP10 - Consultar Saldo:
+    # Pai visualiza total ganho, total pago e saldo atual do filho.
     filhos_data = [] 
     for filho in filhos:
         # Garante carteira e progresso
@@ -404,20 +413,20 @@ def profile_page():
         carteira = filho.carteira or Carteira(membro_id=filho.id, saldo=0)
         if not filho.carteira: db.session.add(carteira)
         
-        # 1. Tarefas Concluídas
+        # Tarefas Concluídas
         tarefas_concluidas = Submissao.query.join(Tarefa).filter(
             Tarefa.executor_id == filho.id,
             Submissao.status == SubmissionStatus.APPROVED
         ).count()
         
-        # --- MUDANÇA AQUI: CALCULAR O TOTAL GANHO (Sem descontar pagamentos) ---
+        # CALCULAR O TOTAL GANHO (Sem descontar pagamentos) ---
         total_ganho_bruto = db.session.query(func.sum(Transacao.valor)).filter(
             Transacao.carteira_id == carteira.id,
             # Soma apenas créditos de Tarefa e Mesada (ignora pagamentos/saques)
             Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
         ).scalar() or 0.0
         
-        # 3. Lógica do Streak (Foguinho)
+        # Lógica do Streak (Foguinho)
         is_streak_active = False
         streak_dias = 0
         submissoes_aprovadas = db.session.query(Submissao.aprovadaEm).join(Tarefa).filter(
@@ -461,7 +470,8 @@ def profile_page():
         filhos_data=filhos_data
     )
 
-# marcar notificações
+# VCP13 - Notificações:
+# Pai recebe, lê e marca como lidas todas as notificações.
 @bp.get("/notifications/read/<notif_id>")
 def mark_read(notif_id):
     guard = _require_parent()
@@ -598,6 +608,9 @@ def tasks_page():
 
 # ... (fim da sua rota @bp.get("/submission/approve/<submissao_id>") ) ...
 
+# VCP08 - Validar/Rejeitar Submissão:
+# Pai aprova (gera XP, adiciona saldo, registra transação)
+# ou rejeita (marca tarefa como INATIVA e notifica).
 @bp.get("/submission/reject/<submissao_id>")
 def reject_submission(submissao_id):
     """Processa a rejeição de uma submissão de tarefa pelo PAI."""
@@ -649,8 +662,8 @@ def reject_submission(submissao_id):
         
     return redirect(url_for("parent.tasks_page"))
 
-# Adicione isso no FINAL do arquivo controllers/parent_controller.py
-
+# VCP12 - Resgatar Recompensa:
+# Pai entrega (DELIVERED) ou rejeita (REJECTED) retornando XP ao filho.
 @bp.get("/rewards/deliver/<resgate_id>")
 def deliver_reward(resgate_id):
     """Marca uma recompensa como ENTREGUE (Aprovada)."""
@@ -692,7 +705,8 @@ def deliver_reward(resgate_id):
         
     return redirect(url_for("parent.rewards_page"))
 
-
+# VCP12 - Resgatar Recompensa:
+# Pai entrega (DELIVERED) ou rejeita (REJECTED) retornando XP ao filho.
 @bp.get("/rewards/reject/<resgate_id>")
 def reject_reward(resgate_id):
     """Rejeita o pedido e DEVOLVE O XP para o filho."""
@@ -779,6 +793,8 @@ def child_detail(child_id):
 
     # C. Saldo Atual (O que o pai deve HOJE)
     saldo_devedor = carteira.saldo
+    # VCP10 - Consultar Saldo:
+    # Pai visualiza total ganho, total pago e saldo atual do filho.
 
     # 2. Histórico Recente (Últimas 5 movimentações)
     historico = Transacao.query.filter_by(carteira_id=carteira.id)\

@@ -40,7 +40,7 @@ def home():
         flash("Erro de sessão. Por favor, faça login novamente.", "error")
         return redirect(url_for("auth.login_page"))
 
-    # --- LÓGICA DO BANCO DE DADOS ---
+    # LÓGICA DO BANCO DE DADOS 
     progresso = Progresso.query.filter_by(membro_id=membro_id).first()
     if not progresso:
         progresso = Progresso(membro_id=membro_id)
@@ -79,7 +79,8 @@ def home():
         ResgateRecompensa.status != ResgateStatus.REJECTED # Conta Pending e Delivered
     ).scalar() or 0
     
-    # Buscar as Tarefas Pendentes
+    # VCP06 - Visualizar Tarefas Pendentes:
+    # Filho vê todas as tarefas ATIVAS ordenadas por prazo.
     tarefas_pendentes = Tarefa.query.filter(
         Tarefa.executor_id == membro_id,
         Tarefa.status == TaskStatus.ATIVA
@@ -115,9 +116,6 @@ def home():
         tarefas_enviadas=tarefas_enviadas
     )
 
-# ---
-# --- 4. A ROTA DE PERFIL ---
-# ---
 @bp.get("/profile")
 def profile_page():
     """Exibe a página de Perfil do FILHO com contagem de dias."""
@@ -129,6 +127,12 @@ def profile_page():
     progresso = membro.progresso
     carteira = membro.carteira
     
+    # VCP09 - Mesada:
+    # Filho vê saldo acumulado na carteira (tarefas + mesadas).
+    # VCP10 - Consultar Saldo:
+    # Mostra carteira, XP total, transações e foguinho.
+
+
     if not progresso:
         progresso = Progresso(membro_id=membro_id)
         db.session.add(progresso)
@@ -137,7 +141,6 @@ def profile_page():
         db.session.add(carteira)
     db.session.commit()
 
-    # --- 1. LÓGICA AVANÇADA DE STREAK (FOGO + DIAS) ---
     is_streak_active = False
     streak_dias = 0
     
@@ -178,7 +181,8 @@ def profile_page():
             is_streak_active = False
             streak_dias = 0
 
-    # --- Restante dos dados ---
+    # VCP11 - Subir de Nível:
+    # Filho visualiza nível e XP atual calculados no parent_controller.
     current_xp = progresso.xp 
     nivel = progresso.nivel
     max_xp = 1000
@@ -205,10 +209,6 @@ def profile_page():
         xp_total_acumulado=xp_total_acumulado,
         tarefas_concluidas_count=tarefas_concluidas_count
     )
-
-# ---
-# --- MUDANÇA 2: ADICIONAR AS NOVAS ROTAS DE "EDITAR PERFIL" ---
-# ---
 
 @bp.get("/profile/edit")
 def edit_profile_page():
@@ -277,7 +277,7 @@ def edit_profile_submit():
     # 5. Redireciona de volta para a página de perfil
     return redirect(url_for("child.profile_page"))
 
-@bp.get("/tasks")  # A nova URL (ex: /child/tasks)
+@bp.get("/tasks")
 def tasks_page():
     """Exibe a página dedicada de 'Tarefas Pendentes'."""
     guard = _require_child()
@@ -288,8 +288,8 @@ def tasks_page():
         flash("Erro de sessão. Por favor, faça login novamente.", "error")
         return redirect(url_for("auth.login_page"))
 
-    # Esta é a MESMA lógica de busca que você já usa no seu @bp.get("/home")
-    # Buscar as Tarefas Pendentes
+    # # VCP06 - Visualizar Tarefas Pendentes:
+    # Filho vê todas as tarefas ATIVAS ordenadas por prazo.
     tarefas_pendentes = Tarefa.query.filter(
         Tarefa.executor_id == membro_id,
         Tarefa.status == TaskStatus.ATIVA
@@ -299,6 +299,10 @@ def tasks_page():
         "child/tasks.html",
         tarefas_pendentes=tarefas_pendentes
     )
+
+# VCP07 - Registrar Tarefa (Filho):
+# Filho envia submissão de tarefa (com ou sem foto),
+# tarefa vira INATIVA e pai recebe notificação.
 @bp.post("/tasks/submit/<tarefa_id>")
 def submit_task_simple(tarefa_id):
     """Processa a submissão de uma tarefa que NÃO exige foto."""
@@ -366,7 +370,9 @@ def submit_task_simple(tarefa_id):
 
     return redirect(url_for("child.tasks_page"))
 
-
+# VCP07 - Registrar Tarefa (Filho):
+# Filho envia submissão de tarefa (com ou sem foto),
+# tarefa vira INATIVA e pai recebe notificação.
 @bp.post("/tasks/submit_photo/<tarefa_id>")
 def submit_task_photo(tarefa_id):
     """Processa a submissão de uma tarefa que EXIGE foto."""
@@ -459,7 +465,6 @@ def submit_task_photo(tarefa_id):
 
     return redirect(url_for("child.tasks_page"))
 
-# --- NOVAS ROTAS: TELA DE RECOMPENSAS ---
 @bp.get("/rewards")
 def rewards_page():
     """Exibe a Loja e o Histórico de Resgates (Regra de 36h)."""
@@ -468,12 +473,11 @@ def rewards_page():
     
     membro = Membro.query.get(session.get('membro_id'))
     
-    # 1. Dados de Saldo e XP
+    # Dados de Saldo e XP
     saldo_atual = membro.carteira.saldo
     xp_atual = membro.saldoXP
     
-    # --- MUDANÇA 1: BUSCAR HISTÓRICO DE RESGATES (PEDIDOS) ---
-    
+    # BUSCAR HISTÓRICO DE RESGATES 
     # Define o limite de tempo (Agora - 36 horas)
     limite_tempo = datetime.utcnow() - timedelta(hours=36)
     historico_resgates = db.session.query(ResgateRecompensa).filter(
@@ -490,8 +494,9 @@ def rewards_page():
         )
     ).order_by(ResgateRecompensa.criadoEm.desc()).all()
     
-    # ---------------------------------------------------------
-    # Lógica de Filtro da Loja (Mantida igual à anterior)
+    # VCP12 - Resgatar Recompensa:
+    # Filho gasta XP, cria pedido PENDING, notifica pais.
+    # Lógica de Filtro da Loja 
     resgates_familia = db.session.query(ResgateRecompensa.recompensa_id)\
         .join(Membro, ResgateRecompensa.membro_id == Membro.id)\
         .filter(Membro.familia_id == membro.familia_id)\
@@ -515,6 +520,8 @@ def rewards_page():
         now=datetime.utcnow()
     )
 
+# VCP12 - Resgatar Recompensa:
+# Filho gasta XP, cria pedido PENDING, notifica pais.
 @bp.post("/rewards/redeem/<recompensa_id>")
 def redeem_reward(recompensa_id):
     """Processa o pedido de resgate de uma recompensa."""

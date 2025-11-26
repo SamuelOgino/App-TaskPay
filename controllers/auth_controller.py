@@ -2,12 +2,15 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# --- 1. NOVAS IMPORTAÇÕES ---
+# NOVAS IMPORTAÇÕES
 from models.models import Usuario, Familia, Membro, Role # Importe suas classes!
 from extensions import db # Importe o 'db'
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 # ===== LOGIN =====
+# VCP02 - Login:
+# Verifica email/senha, identifica se é PARENT ou CHILD,
+# cria sessão e redireciona para home correspondente.
 @bp.get("/login")
 def login_page():
     """Tela inicial de login (pais)."""
@@ -35,15 +38,15 @@ def login_submit():
         flash("Informe e-mail e senha.", "error")
         return redirect(url_for("auth.login_child_page") if role == "CHILD" else url_for("auth.login_parent_page"))
 
-    # 1. Encontre o 'Usuario' pelo email
+    # Encontre o 'Usuario' pelo email
     usuario = Usuario.query.filter_by(email=email).first()
 
-    # 2. Verifique se o usuário existe E se a senha bate
+    # Verifique se o usuário existe E se a senha bate
     if not usuario or not check_password_hash(usuario.senhaHash, password):
         flash("Credenciais inválidas (e-mail ou senha).", "error")
         return redirect(url_for("auth.login_child_page") if role == "CHILD" else url_for("auth.login_parent_page"))
 
-    # 3. Verifique se o usuário tem um 'Membro' com o 'role' que ele está tentando logar
+    # Verifique se o usuário tem um 'Membro' com o 'role' que ele está tentando logar
     # (Seu diagrama permite que um usuário seja PAI em uma família e FILHO em outra)
     membro = Membro.query.filter_by(usuario_id=usuario.id, role=role).first()
     
@@ -51,7 +54,7 @@ def login_submit():
         flash("Tipo de conta não corresponde ao cadastro desse e-mail.", "error")
         return redirect(url_for("auth.login_child_page") if role == "CHILD" else url_for("auth.login_parent_page"))
 
-    # 4. Login OK! Guarda tudo na sessão
+    # Login OK! Guarda tudo na sessão
     session["user_id"] = usuario.id
     session["user_email"] = usuario.email
     session["name"] = usuario.nome
@@ -75,6 +78,12 @@ def logout():
 
 
 # ===== REGISTER =====
+# VCP01 - Cadastro de Usuário:
+# Valida campos, cria Usuario, cria Família (quando PARENT),
+# cria Membro da família, salva no banco.
+# VCP03 - Criar Família:
+# Já criado no registro do PAI; aqui o parent_controller usa familia_id
+# para carregar filhos, tarefas e recompensas.
 @bp.get("/register")
 def register_page():
     """Exibe tela de cadastro."""
@@ -95,18 +104,17 @@ def register_submit():
         flash("Nome, e-mail e senha são obrigatórios.", "error")
         return redirect(url_for("auth.register_page"))
 
-    # --- 4. LÓGICA DE REGISTRO COM BANCO DE DADOS ---
-
-    # 1. Verifica se o email já existe na tabela 'Usuario'
+    # LÓGICA DE REGISTRO COM BANCO DE DADOS
+    # Verifica se o email já existe na tabela 'Usuario'
     usuario_existente = Usuario.query.filter_by(email=email).first()
     if usuario_existente:
         flash("Não foi possível cadastrar (e-mail já existe?).", "error")
         return redirect(url_for("auth.register_page"))
 
-    # 2. Criptografa a senha (NUNCA salve a senha pura)
+    # Criptografa a senha (NUNCA salve a senha pura)
     senha_hash = generate_password_hash(password)
 
-    # 3. Cria o usuário
+    # Cria o usuário
     novo_usuario = Usuario(nome=name, email=email, senhaHash=senha_hash)
 
     try:
@@ -148,7 +156,7 @@ def register_submit():
             flash("Tipo de conta inválido.", "error")
             return redirect(url_for("auth.register_page"))
 
-        # 4. Salva tudo no banco de dados!
+        # Salva tudo no banco de dados
         db.session.commit()
 
     except Exception as e:
