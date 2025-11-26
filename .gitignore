@@ -1,0 +1,12 @@
+# Lixos do Python
+__pycache__/
+*.pyc
+
+# Banco de dados local
+app.db
+
+# Sessões Flask
+flask_session/
+
+# MacOS lixo
+.DS_Store
