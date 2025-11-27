@@ -11,7 +11,9 @@
 </head>
 <body>
 
-    <div class="phone"> <header class="app-header">
+    <div class="phone">
+        
+        <header class="app-header">
             {{ flash_messages() }}
             <a href="{{ url_for('auth.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
@@ -52,14 +54,14 @@
                     </div>
                     <div class="toast-content">
                         <div class="toast-msg">{{ n.mensagem }}</div>
-                        <div class="toast-time">{{ n.enviadaEm.strftime('%H:%M') }}</div>
+                        <div class="toast-time">Agora</div>
                     </div>
                 </div>
             {% endfor %}
         </div>
         {% endif %}
+
         <main class="content-area">
-            
             <h2 class="page-title">Início</h2> 
             
             <div class="card xp-card">
@@ -141,23 +143,9 @@
             <a href="{{ url_for('child.rewards_page') }}" class="nav-item"><i class="fa-solid fa-gift"></i><span>Recompensas</span></a>
             <a href="{{ url_for('child.profile_page') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
         </footer>
-    </div> <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toasts = document.querySelectorAll('.toast-notification');
-            toasts.forEach(toast => {
-                setTimeout(() => {
-                    toast.classList.add('hiding');
-                    toast.addEventListener('animationend', () => {
-                        toast.remove();
-                        const container = document.getElementById('toast-container');
-                        if (container && container.children.length === 0) {
-                            container.remove();
-                        }
-                    });
-                }, 8000);
-            });
-        });
-    </script>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/home_child.js') }}"></script>
 
 </body>
 </html>
