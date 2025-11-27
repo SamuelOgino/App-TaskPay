@@ -146,7 +146,7 @@ def manage_page():
     
     limite_tempo = datetime.utcnow() - timedelta(hours=36)
     historico = (ResgateRecompensa.query
-        .join(Membro).join(Recompensa)
+        .join(Membro,ResgateRecompensa.membro_id == Membro.id).join(Recompensa, ResgateRecompensa.recompensa_id == Recompensa.id)
         .filter(Membro.familia_id == membro.familia_id)
         .filter(or_(
             ResgateRecompensa.status == ResgateStatus.PENDING,
@@ -191,7 +191,7 @@ def deliver_reward(resgate_id):
         
     return redirect(url_for("resgatar.manage_page"))
 
-# VCP10 - Resgatar Recompensa:
+# VCP10 - Resgatar/rejeitar Recompensa:
 # Pai entrega (DELIVERED) ou rejeita (REJECTED) retornando XP ao filho.
 @resgatar_bp.get("/reject/<resgate_id>")
 def reject_reward(resgate_id):
