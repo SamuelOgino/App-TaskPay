@@ -38,7 +38,15 @@
                 </div>
                 
                 <div class="profile-info-text">
-                    <h2>{{ usuario.nome }}</h2>
+                    <h2>
+                        {{ usuario.nome }}
+                        
+                        {% if plano_atual == 'PRO' %}
+                            <span class="badge-plan pro">Plano PRO</span>
+                        {% else %}
+                            <span class="badge-plan free">Plano Free</span>
+                        {% endif %}
+                    </h2>
                     <p class="role">Responsável</p>
                 </div>
             </div>

@@ -55,7 +55,7 @@ class Familia(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     nome = db.Column(db.String(100), nullable=False)
     criadoEm = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    
+    plano = db.Column(db.String(20), nullable=False, default="FREE")
     # Relacionamentos (1-para-N)
     membros = db.relationship('Membro', back_populates='familia', lazy=True)
     recompensas = db.relationship('Recompensa', back_populates='familia', lazy=True)

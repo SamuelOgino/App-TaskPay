@@ -188,3 +188,86 @@
     color: #9ca3af;
     cursor: not-allowed;
 }
+
+/* ========================================= */
+/* BLOQUEIO PRO (LOCK SCREEN) - ADICIONAR NO FIM */
+/* ========================================= */
+
+.content-area {
+    position: relative; /* Necessário para o overlay cobrir apenas esta área */
+}
+
+/* O fundo desfocado */
+.pro-lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.6); /* Branco transparente */
+    backdrop-filter: blur(6px); /* Efeito de vidro fosco */
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border-radius: 20px; /* Acompanha o arredondamento do layout */
+}
+
+/* O cartão do cadeado */
+.lock-card {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    max-width: 300px;
+    border: 1px solid #fef08a; /* Borda sutil amarela */
+}
+
+.lock-icon {
+    font-size: 3rem;
+    color: #ca8a04;
+    margin-bottom: 15px;
+    background: #fefce8;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+}
+
+.lock-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.lock-desc {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+/* Botão "Bloqueado" (apenas visual) */
+.btn-lock {
+    background: #e5e7eb;
+    color: #9ca3af;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: not-allowed;
+    display: inline-block;
+    width: 100%;
+}
+
+/* Classe que aplica o desfoque no conteúdo abaixo */
+.blur-content {
+    filter: blur(3px);
+    pointer-events: none; /* Impede cliques */
+    user-select: none;    /* Impede seleção de texto */
+    opacity: 0.6;
+}

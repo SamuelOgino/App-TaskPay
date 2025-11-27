@@ -246,12 +246,14 @@ def rewards_page():
         .order_by(ResgateRecompensa.criadoEm.desc())
         .all()
     )
+    plano_atual = parent_member.familia.plano
 
     return render_template("parent/rewards.html",
                            filhos=filhos,
                            xp_por_filho=xp_por_filho,
                            ativas=ativas,     # Lista filtrada (sem itens pegos)
-                           historico=historico) # Lista filtrada (sem itens velhos)
+                           historico=historico,
+                           plano_atual=plano_atual) # Lista filtrada (sem itens velhos)
 
 @bp.get("/rewards/new")
 def new_reward_page():
@@ -403,7 +405,6 @@ def profile_page():
     filhos = Membro.query.filter_by(familia_id=parent_member.familia_id, role=Role.CHILD).all()
     
     # VCP10 - Consultar Saldo:
-    # Pai visualiza total ganho, total pago e saldo atual do filho.
     filhos_data = [] 
     for filho in filhos:
         # Garante carteira e progresso
@@ -419,10 +420,9 @@ def profile_page():
             Submissao.status == SubmissionStatus.APPROVED
         ).count()
         
-        # CALCULAR O TOTAL GANHO (Sem descontar pagamentos) ---
+        # CALCULAR O TOTAL GANHO
         total_ganho_bruto = db.session.query(func.sum(Transacao.valor)).filter(
             Transacao.carteira_id == carteira.id,
-            # Soma apenas créditos de Tarefa e Mesada (ignora pagamentos/saques)
             Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
         ).scalar() or 0.0
         
@@ -456,18 +456,23 @@ def profile_page():
         filhos_data.append({
             "membro": filho,
             "tarefas_concluidas": tarefas_concluidas,
-            "saldo": carteira.saldo,         # Saldo real (usado internamente, se precisar)
-            "total_ganho": total_ganho_bruto, # NOVO CAMPO: Valor Bruto
+            "saldo": carteira.saldo,
+            "total_ganho": total_ganho_bruto,
             "is_streak_active": is_streak_active,
             "streak_dias": streak_dias
         })
     
     db.session.commit()
 
+    # --- AQUI ESTÁ A MUDANÇA ---
+    # Pegamos o plano direto da família (Texto "FREE" ou "PRO")
+    plano_atual = parent_member.familia.plano
+
     return render_template(
         "parent/profile.html",
         usuario=usuario,
-        filhos_data=filhos_data
+        filhos_data=filhos_data,
+        plano_atual=plano_atual  # <--- Passando a variável para o HTML
     )
 
 # VCP13 - Notificações:
@@ -752,7 +757,35 @@ def reject_reward(resgate_id):
 
 @bp.get("/plans")
 def plans_page():
-    return render_template("parent/plans.html")
+    guard = _require_parent()
+    if guard: return guard
+    
+    parent_member = _current_parent_member()
+    plano_atual = parent_member.familia.plano
+    
+    return render_template("parent/plans.html", plano_atual=plano_atual)
+
+# --- NOVA ROTA PARA ASSINAR ---
+@bp.post("/plans/subscribe")
+def subscribe_pro():
+    """Muda o plano da família para PRO."""
+    guard = _require_parent()
+    if guard: return guard
+    
+    parent_member = _current_parent_member()
+    familia = parent_member.familia
+    
+    try:
+        # Atualiza diretamente para a string "PRO"
+        familia.plano = "PRO"
+        db.session.commit()
+        
+        flash("Pagamento confirmado! Bem-vindo ao TaskPay PRO!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao assinar: {e}", "error")
+        
+    return redirect(url_for("parent.home"))
 
 # --- NOVAS ROTAS: DETALHES FINANCEIROS DO FILHO ---
 

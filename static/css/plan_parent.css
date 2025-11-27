@@ -229,27 +229,6 @@ html, body {
 .btn.large {
     padding: 18px;
 }
-
-/* ---------------------------------------- */
-/* 7. COMPARAÇÃO DE PLANOS                   */
-/* ---------------------------------------- */
-.comparison-card table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.comparison-card th {
-    font-size: .9rem;
-    padding-bottom: 10px;
-}
-
-.comparison-card td {
-    text-align: center;
-    padding: 8px 0;
-    border-top: 1px solid var(--border);
-}
-
 /* ---------------------------------------- */
 /* 8. FAQ                                     */
 /* ---------------------------------------- */
@@ -313,4 +292,18 @@ html, body {
 
 .nav-item.active {
     color: var(--primary);
+}
+
+.destaque-gold {
+    color: #d97706; /* Um tom dourado escuro para leitura fácil */
+    font-weight: 800; /* Letra bem grossa */
+    background: #fffbeb; /* Fundo amarelo bem clarinho para destacar */
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid #fcd34d;
+    width: fit-content; /* Ocupa apenas o espaço do texto */
+}
+
+.destaque-gold i {
+    color: #b45309; /* Ícone um pouco mais escuro */
 }

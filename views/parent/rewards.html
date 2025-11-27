@@ -20,93 +20,100 @@
     </header>
 
     <main class="content-area">
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h2 class="section-title">Recompensas</h2>
-        <a class="btn green" href="{{ url_for('parent.new_reward_page') }}"><i class="fa-solid fa-plus"></i> Nova Recompensa</a>
-      </div>
-
-      <div class="card">
-        <h3 style="font-weight:700;margin-bottom:12px">Resumo de XP</h3>
-        <div class="grid-two">
-          {% for k in xp_por_filho %}
-            <div class="kid-card">
-              
-              <img src="{{ url_for('static', filename='uploads/' + k.avatar) if k.avatar else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="{{k.nome}}">
-              
-              <div style="flex:1">
-                <div style="font-weight:700">{{ k.nome }}</div>
-                <div class="xp"><i class="fa-solid fa-star"></i> {{ k.xp }} XP</div>
+      
+      {% if plano_atual == 'FREE' %}
+      <div class="pro-lock-overlay">
+          <div class="lock-card">
+              <div class="lock-icon">
+                  <i class="fa-solid fa-lock"></i>
               </div>
-            </div>
-          {% else %}
-            <p style="color:var(--muted)">Sem filhos cadastrados nesta família.</p>
-          {% endfor %}
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-weight:700;margin-bottom:12px">Recompensas Ativas</h3>
-        {% for r in ativas %}
-          <div class="reward-item">
-            <div>
-              <div class="title">{{ r.titulo }}</div>
-              <div class="cost">{{ r.custoXP }} XP</div>
-            </div>
-            </div>
-        {% else %}
-          <div class="reward-item">
-            <div>Sem recompensas ativas</div>
-          </div>
-        {% endfor %}
-      </div>
-
-      <div class="card">
-        <h3 style="font-weight:700;margin-bottom:12px">Recompensas Resgatadas</h3>
-        
-        {% for h in historico %}
-          <div class="reward-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #eee;">
-            
-            <div style="flex: 1;">
-              <div class="title" style="font-weight: 700;">{{ h.recompensa.titulo if h.recompensa else 'Recompensa' }}</div>
-              <div class="cost" style="font-size: 0.85rem; color: var(--muted);">
-                  Resgatado por <strong>{{ h.membro.usuario.nome }}</strong> • {{ h.xpPago }} XP
-              </div>
+              <h3 class="lock-title">Funcionalidade PRO</h3>
+              <p class="lock-desc">A Loja de Recompensas e o Controle de XP são exclusivos para assinantes Premium.</p>
               
-              </div>
-            
-            <div style="display: flex; align-items: center; gap: 8px;">
-                
-                {% if h.status == 'PENDING' %}
-                    <a href="{{ url_for('parent.deliver_reward', resgate_id=h.id) }}" 
-                       onclick="return confirm('Confirmar entrega?');"
-                       style="background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #bbf7d0;">
-                       <i class="fa-solid fa-check"></i>
-                    </a>
-
-                    <a href="{{ url_for('parent.reject_reward', resgate_id=h.id) }}" 
-                       onclick="return confirm('Rejeitar e devolver XP?');"
-                       style="background-color: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #fecaca;">
-                       <i class="fa-solid fa-xmark"></i>
-                    </a>
-
-                {% else %}
-                    <span class="badge" style="font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background-color: #f3f4f6; color: #6b7280;">
-                        {{ h.status }}
-                    </span>
-                {% endif %}
-                
-            </div>
-
+              <a href="{{ url_for('parent.plans_page') }}" class="btn primary">
+                  Liberar Acesso Agora
+              </a>
           </div>
-        {% else %}
-          <div class="reward-item">
-            <div style="color: var(--muted); text-align: center; padding: 20px;">Sem resgates no histórico</div>
-          </div>
-        {% endfor %}
       </div>
+      {% endif %}
 
-    </main>
+      <div class="{% if plano_atual == 'FREE' %}blur-content{% endif %}">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <h2 class="section-title">Recompensas</h2>
+            <a class="btn green" href="{{ url_for('parent.new_reward_page') }}"><i class="fa-solid fa-plus"></i> Nova Recompensa</a>
+          </div>
+
+          <div class="card">
+            <h3 style="font-weight:700;margin-bottom:12px">Resumo de XP</h3>
+            <div class="grid-two">
+              {% for k in xp_por_filho %}
+                <div class="kid-card">
+                  <img src="{{ url_for('static', filename='uploads/' + k.avatar) if k.avatar else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="{{k.nome}}">
+                  <div style="flex:1">
+                    <div style="font-weight:700">{{ k.nome }}</div>
+                    <div class="xp"><i class="fa-solid fa-star"></i> {{ k.xp }} XP</div>
+                  </div>
+                </div>
+              {% else %}
+                <p style="color:var(--muted)">Sem filhos cadastrados nesta família.</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-weight:700;margin-bottom:12px">Recompensas Ativas</h3>
+            {% for r in ativas %}
+              <div class="reward-item">
+                <div>
+                  <div class="title">{{ r.titulo }}</div>
+                  <div class="cost">{{ r.custoXP }} XP</div>
+                </div>
+                </div>
+            {% else %}
+              <div class="reward-item">
+                <div>Sem recompensas ativas</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="card">
+            <h3 style="font-weight:700;margin-bottom:12px">Recompensas Resgatadas</h3>
+            {% for h in historico %}
+              <div class="reward-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #eee;">
+                <div style="flex: 1;">
+                  <div class="title" style="font-weight: 700;">{{ h.recompensa.titulo if h.recompensa else 'Recompensa' }}</div>
+                  <div class="cost" style="font-size: 0.85rem; color: var(--muted);">
+                      Resgatado por <strong>{{ h.membro.usuario.nome }}</strong> • {{ h.xpPago }} XP
+                  </div>
+                  </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    {% if h.status == 'PENDING' %}
+                        <a href="{{ url_for('parent.deliver_reward', resgate_id=h.id) }}" 
+                           onclick="return confirm('Confirmar entrega?');"
+                           style="background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #bbf7d0;">
+                           <i class="fa-solid fa-check"></i>
+                        </a>
+                        <a href="{{ url_for('parent.reject_reward', resgate_id=h.id) }}" 
+                           onclick="return confirm('Rejeitar e devolver XP?');"
+                           style="background-color: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #fecaca;">
+                           <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    {% else %}
+                        <span class="badge" style="font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background-color: #f3f4f6; color: #6b7280;">
+                            {{ h.status }}
+                        </span>
+                    {% endif %}
+                </div>
+              </div>
+            {% else %}
+              <div class="reward-item">
+                <div style="color: var(--muted); text-align: center; padding: 20px;">Sem resgates no histórico</div>
+              </div>
+            {% endfor %}
+          </div>
+
+      </div> </main>
 
     <footer class="app-footer-nav">
           <a href="{{ url_for('parent.home') }}" class="nav-item"> 

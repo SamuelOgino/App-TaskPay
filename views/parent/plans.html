@@ -30,85 +30,84 @@
             <p class="subtitle">Escolha o plano ideal para sua família</p>
         </div>
 
-        <!-- PLANO ATUAL -->
-        <section class="card plan-card current">
-            <h3 class="plan-name">Seu plano atual: <span class="tag-free">FREE</span></h3>
+        <section class="card plan-card {% if plano_atual == 'FREE' %}current{% endif %}">
+            <h3 class="plan-name">
+                {% if plano_atual == 'FREE' %}Seu plano atual: <span class="tag-free">FREE</span>{% else %}Plano Grátis{% endif %}
+            </h3>
             <p class="price-free">R$ 0,00 / mês</p>
 
             <ul class="plan-list">
-                <li><i class="fa-solid fa-circle-check"></i> 1 pai + 1 filho</li>
-                <li><i class="fa-solid fa-circle-check"></i> Tarefas limitadas</li>
+                <li><i class="fa-solid fa-circle-check"></i> 1 pai + filhos ilimitados</li>
+                <li><i class="fa-solid fa-circle-check"></i> Tarefas ilimitadas</li>
                 <li><i class="fa-solid fa-circle-check"></i> Envio de fotos</li>
                 <li><i class="fa-solid fa-circle-check"></i> Aprovação parental</li>
                 <li><i class="fa-solid fa-circle-check"></i> Histórico básico</li>
             </ul>
 
-            <button class="btn disabled" disabled>Plano Atual</button>
+            <button class="btn disabled" disabled>
+                {% if plano_atual == 'FREE' %}Plano Ativo{% else %}Incluído no PRO{% endif %}
+            </button>
         </section>
 
-        <!-- PLANO PRO -->
-        <section class="card plan-card pro">
-            <div class="badge-popular">MAIS ESCOLHIDO</div>
+        <section class="card plan-card pro {% if plano_atual == 'PRO' %}current{% endif %}">
+            
+            {% if plano_atual == 'FREE' %}
+                <div class="badge-popular">MAIS ESCOLHIDO</div>
+            {% endif %}
 
-            <h3 class="plan-name">TaskPay PRO</h3>
+            <h3 class="plan-name">
+                TaskPay PRO 
+                {% if plano_atual == 'PRO' %}<span style="font-size: 0.6em; background:var(--warning); color: white; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">ATIVO</span>{% endif %}
+            </h3>
             <p class="price-month">R$ 9,90/mês</p>
             <p class="price-annual">ou R$ 99,00/ano (economize 15%)</p>
 
             <ul class="plan-list">
-                <li><i class="fa-solid fa-fire"></i> Até 5 filhos</li>
-                <li><i class="fa-solid fa-chart-line"></i> Relatórios completos</li>
-                <li><i class="fa-solid fa-bullseye"></i> Metas financeiras</li>
-                <li><i class="fa-solid fa-gift"></i> Loja de recompensas</li>
-                <li><i class="fa-solid fa-scroll"></i> Streaks e conquistas</li>
-                <li><i class="fa-solid fa-brain"></i> Mini-aulas financeiras</li>
-                <li><i class="fa-solid fa-user-astronaut"></i> Personalização de avatar</li>
+                <li><i class="fa-solid fa-check"></i> 1 pai + filhos ilimitados</li>
+                <li><i class="fa-solid fa-check"></i> Tarefas ilimitadas</li>
+                <li><i class="fa-solid fa-check"></i> Envio de fotos</li>
+                <li><i class="fa-solid fa-check"></i> Aprovação parental</li>
+                <li><i class="fa-solid fa-check"></i> Histórico básico</li>
+                
+                <li style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top:10px; color: var(--primary); font-weight:bold;">
+                    <i class="fa-solid fa-plus"></i> EXCLUSIVO PRO:
+                </li>
+
                 <li><i class="fa-solid fa-headset"></i> Suporte prioritário</li>
+                <li><i class="fa-solid fa-bolt"></i> Funcionalidade do XP</li>
+                <li><i class="fa-solid fa-chart-line"></i> Resumo de XP</li>
+                
+                <li class="destaque-gold">
+                    <i class="fa-solid fa-gift"></i> Loja de Recompensas
+                </li>
             </ul>
 
-            <button class="btn primary">Assinar PRO</button>
+            {% if plano_atual == 'FREE' %}
+                <form action="{{ url_for('parent.subscribe_pro') }}" method="POST">
+                    <button type="submit" class="btn primary">Assinar PRO Agora</button>
+                </form>
+            {% else %}
+                <button class="btn disabled" disabled>Você já é PRO!</button>
+                <p style="text-align: center; font-size: 0.8rem; margin-top: 5px; color: var(--muted);">Sua assinatura está ativa e rodando.</p>
+            {% endif %}
+
         </section>
 
-        <!-- COMPARAÇÃO -->
-        <section class="card comparison-card">
-            <h3 class="section-title">Comparação de planos</h3>
-
-            <table class="plans-table">
-                <tr><th>Recurso</th><th>FREE</th><th>PRO</th></tr>
-                <tr><td>Tarefas ilimitadas</td><td>✔</td><td>✔</td></tr>
-                <tr><td>1 filho</td><td>✔</td><td>—</td></tr>
-                <tr><td>Até 5 filhos</td><td>—</td><td>✔</td></tr>
-                <tr><td>Loja de recompensas</td><td>—</td><td>✔</td></tr>
-                <tr><td>Relatórios completos</td><td>—</td><td>✔</td></tr>
-                <tr><td>Streaks e conquistas</td><td>—</td><td>✔</td></tr>
-            </table>
-        </section>
-
-        <!-- FAQ -->
         <section class="card faq-card">
             <h3 class="section-title">Perguntas frequentes</h3>
-
             <details class="faq-item">
                 <summary>Posso cancelar quando quiser?</summary>
                 <p>Sim. Cancelamento imediato.</p>
             </details>
-
             <details class="faq-item">
                 <summary>Existe período de teste?</summary>
                 <p>Sim! 7 dias gratuitos no PRO.</p>
             </details>
-
             <details class="faq-item">
                 <summary>Perco dados ao mudar de plano?</summary>
                 <p>Não. Todo histórico é preservado.</p>
             </details>
         </section>
-
-        <!-- CTA -->
-        <div class="cta-final">
-            <h3>Potencialize o TaskPay na sua família</h3>
-            <p>Aprendizado financeiro + organização + autonomia</p>
-            <button class="btn primary large">Assinar PRO agora</button>
-        </div>
 
     </main>
 

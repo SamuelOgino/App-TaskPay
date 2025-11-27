@@ -508,7 +508,8 @@ def rewards_page():
         query_loja = query_loja.filter(Recompensa.id.notin_(ids_esconder))
         
     recompensas_disponiveis = query_loja.order_by(Recompensa.custoXP.asc()).all()
-    
+    plano_atual = membro.familia.plano
+
     return render_template(
         "child/rewards.html",
         membro=membro,
@@ -517,7 +518,8 @@ def rewards_page():
         # MUDANÇA NO NOME DA VARIÁVEL ENVIADA:
         historico_resgates=historico_resgates, 
         recompensas=recompensas_disponiveis,
-        now=datetime.utcnow()
+        now=datetime.utcnow(),
+        plano_atual=plano_atual
     )
 
 # VCP12 - Resgatar Recompensa:

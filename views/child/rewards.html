@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home_child.css') }}">
-    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/rewards_child.css') }}">
 </head>
 <body>
@@ -31,117 +30,134 @@
         <main class="content-area">
             {{ flash_messages() }}
 
-            <div class="section-header" style="margin-top: 10px;">
-                <h3>Extrato de Mesada</h3>
-                <span style="font-size: 0.8rem; color: var(--muted);">
-                    {{ now.strftime('%B %Y') if now else 'Atual' }}
-                </span>
-            </div>
-
-            <div class="balance-summary-card">
-                <div class="balance-label">Saldo disponível</div>
-                <div class="balance-row">
-                    <div class="balance-value">R$ {{ "%.2f"|format(saldo_atual|float) }}</div>
-                    <div class="xp-tag">+ {{ xp_atual }} XP</div>
+            {% if plano_atual == 'FREE' %}
+            <div class="pro-lock-overlay">
+                <div class="lock-card">
+                    <div class="lock-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h3 class="lock-title">Exclusivo PRO</h3>
+                    <p class="lock-desc">
+                        A Loja de Recompensas está bloqueada. Peça para seus pais ativarem o plano PRO!
+                    </p>
+                    <button class="btn-lock">Bloqueado</button>
                 </div>
             </div>
+            {% endif %}
 
-            <div class="history-section">
-                <div class="section-header">
-                    <h3>Meus Pedidos</h3>
+            <div class="{% if plano_atual == 'FREE' %}blur-content{% endif %}">
+
+                <div class="section-header" style="margin-top: 10px;">
+                    <h3>Extrato de Mesada</h3>
+                    <span style="font-size: 0.8rem; color: var(--muted);">
+                        {{ now.strftime('%B %Y') if now else 'Atual' }}
+                    </span>
                 </div>
 
-                {% if historico_resgates %}
-                    {% for resgate in historico_resgates %}
-                    <div class="history-item" style="justify-content: space-between;">
-                        
-                        <div style="display: flex; align-items: center;">
-                            <div class="task-icon-circle" style="background: #fef9c3; color: #ca8a04;">
-                                <i class="fa-solid fa-gift"></i>
-                            </div>
-                            <div class="task-details">
-                                <div class="task-name">{{ resgate.recompensa.titulo }}</div>
-                                
-                                <div style="margin-top: 4px;">
-                                    {% if resgate.status == 'PENDING' %}
-                                        <span style="background: #fef08a; color: #854d0e; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
-                                            Aguardando
-                                        </span>
-                                    {% elif resgate.status == 'DELIVERED' %}
-                                        <span style="background: #dcfce7; color: #166534; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
-                                            Entregue
-                                        </span>
-                                    {% elif resgate.status == 'REJECTED' %}
-                                        <span style="background: #fee2e2; color: #991b1b; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
-                                            Cancelado / Reembolsado
-                                        </span>
-                                    {% endif %}
+                <div class="balance-summary-card">
+                    <div class="balance-label">Saldo disponível</div>
+                    <div class="balance-row">
+                        <div class="balance-value">R$ {{ "%.2f"|format(saldo_atual|float) }}</div>
+                        <div class="xp-tag">+ {{ xp_atual }} XP</div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="section-header">
+                        <h3>Meus Pedidos</h3>
+                    </div>
+
+                    {% if historico_resgates %}
+                        {% for resgate in historico_resgates %}
+                        <div class="history-item" style="justify-content: space-between;">
+                            
+                            <div style="display: flex; align-items: center;">
+                                <div class="task-icon-circle" style="background: #fef9c3; color: #ca8a04;">
+                                    <i class="fa-solid fa-gift"></i>
+                                </div>
+                                <div class="task-details">
+                                    <div class="task-name">{{ resgate.recompensa.titulo }}</div>
+                                    
+                                    <div style="margin-top: 4px;">
+                                        {% if resgate.status == 'PENDING' %}
+                                            <span style="background: #fef08a; color: #854d0e; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                                Aguardando
+                                            </span>
+                                        {% elif resgate.status == 'DELIVERED' %}
+                                            <span style="background: #dcfce7; color: #166534; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                                Entregue
+                                            </span>
+                                        {% elif resgate.status == 'REJECTED' %}
+                                            <span style="background: #fee2e2; color: #991b1b; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                                Cancelado
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
+
+                            {% if resgate.status == 'REJECTED' %}
+                                <div class="task-value" style="color: #16a34a;">
+                                    + {{ resgate.xpPago }} XP
+                                </div>
+                            {% else %}
+                                <div class="task-value" style="color: #ca8a04;">
+                                    - {{ resgate.xpPago }} XP
+                                </div>
+                            {% endif %}
+
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align: center; padding: 20px; color: var(--muted); font-size: 0.9rem; background: #fff; border-radius: 12px; border: 1px solid var(--border);">
+                            Nenhum pedido recente.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="shop-section">
+                    <div class="section-header">
+                        <h3>Loja de Recompensas</h3>
+                    </div>
+
+                    <div class="shop-container">
+                        <div class="shop-header">
+                            <div style="font-size: 0.85rem; font-weight: 600; color: #854d0e;">Seus pontos</div>
+                            <div class="shop-points">{{ xp_atual }} XP</div>
+                            <div class="shop-desc">Troque seus XP's por recompensas especiais!</div>
                         </div>
 
-                        {% if resgate.status == 'REJECTED' %}
-                            <div class="task-value" style="color: #16a34a;">
-                                + {{ resgate.xpPago }} XP
-                            </div>
-                        {% else %}
-                            <div class="task-value" style="color: #ca8a04;">
-                                - {{ resgate.xpPago }} XP
-                            </div>
-                        {% endif %}
-
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div style="text-align: center; padding: 20px; color: var(--muted); font-size: 0.9rem; background: #fff; border-radius: 12px; border: 1px solid var(--border);">
-                        Nenhum pedido recente.
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="shop-section">
-                <div class="section-header">
-                    <h3>Loja de Recompensas</h3>
-                </div>
-
-                <div class="shop-container">
-                    <div class="shop-header">
-                        <div style="font-size: 0.85rem; font-weight: 600; color: #854d0e;">Seus pontos</div>
-                        <div class="shop-points">{{ xp_atual }} XP</div>
-                        <div class="shop-desc">Troque seus XP's por recompensas especiais!</div>
-                    </div>
-
-                    <div class="rewards-grid">
-                        {% if recompensas %}
-                            {% for item in recompensas %}
-                            <div class="reward-card">
-                                <div>
-                                    <div class="reward-title">{{ item.titulo }}</div>
-                                    <div class="reward-cost">{{ item.custoXP }} XP</div>
+                        <div class="rewards-grid">
+                            {% if recompensas %}
+                                {% for item in recompensas %}
+                                <div class="reward-card">
+                                    <div>
+                                        <div class="reward-title">{{ item.titulo }}</div>
+                                        <div class="reward-cost">{{ item.custoXP }} XP</div>
+                                    </div>
+                                    
+                                    <form action="{{ url_for('child.redeem_reward', recompensa_id=item.id) }}" method="POST">
+                                        <button type="submit" class="btn-redeem" 
+                                            {% if xp_atual < item.custoXP %}disabled{% endif %}>
+                                            {% if xp_atual < item.custoXP %}
+                                                Falta XP
+                                            {% else %}
+                                                Resgatar
+                                            {% endif %}
+                                        </button>
+                                    </form>
                                 </div>
-                                
-                                <form action="{{ url_for('child.redeem_reward', recompensa_id=item.id) }}" method="POST">
-                                    <button type="submit" class="btn-redeem" 
-                                        {% if xp_atual < item.custoXP %}disabled{% endif %}>
-                                        {% if xp_atual < item.custoXP %}
-                                            Falta XP
-                                        {% else %}
-                                            Resgatar
-                                        {% endif %}
-                                    </button>
-                                </form>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div style="grid-column: span 2; text-align: center; color: #854d0e; font-size: 0.9rem; padding: 10px;">
-                                Nenhuma recompensa disponível no momento.
-                            </div>
-                        {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div style="grid-column: span 2; text-align: center; color: #854d0e; font-size: 0.9rem; padding: 10px;">
+                                    Nenhuma recompensa disponível no momento.
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-        </main>
+            </div> </main>
 
         <footer class="app-footer-nav">
             <a href="{{ url_for('child.home') }}" class="nav-item">

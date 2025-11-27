@@ -485,3 +485,29 @@ input[type="file"] {
   border: 1px solid #bbf7d0;
   color: #064e3b;
 }
+
+/* Badge de Plano ao lado do nome */
+.badge-plan {
+    font-size: 0.7rem; /* Texto pequeno */
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-left: 8px; /* Espaço entre o nome e o selo */
+    vertical-align: middle;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Estilo para o Plano PRO (Dourado/Laranja) */
+.badge-plan.pro {
+    background-color: #f59e0b; /* Cor amarela/ouro */
+    color: white;
+    border: 1px solid #d97706;
+    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3); /* Brilho suave */
+}
+
+/* Estilo para o Plano FREE (Cinza/Azul) */
+.badge-plan.free {
+    background-color: #e2e8f0; /* Cinza claro */
+    color: #64748b; /* Texto cinza escuro */
+    border: 1px solid #cbd5e1;
+}
