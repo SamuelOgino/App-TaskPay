@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 
 # Banco de dados local
-app.db
 
 # Sessões Flask
 flask_session/
