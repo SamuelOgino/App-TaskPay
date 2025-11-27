@@ -1,14 +1,11 @@
-from extensions import db  # Importa o objeto 'db' que criamos
+from extensions import db  
 from datetime import datetime
 import uuid
-from decimal import Decimal # Importante para dinheiro
+from decimal import Decimal 
 
-# --- Função Auxiliar para gerar IDs UUID ---
 def generate_uuid():
     return str(uuid.uuid4())
 
-# --- Enums (Definições do seu diagrama) ---
-# Usamos classes de string simples para fácil armazenamento no banco
 class Role(str):
     PARENT = "PARENT"
     CHILD = "CHILD"
@@ -186,13 +183,8 @@ class Recompensa(db.Model):
 
     familia = db.relationship("Familia", back_populates="recompensas")
     
-    # --- CORREÇÃO 1 ---
-    # Precisamos dizer ao SQLAlchemy qual 'foreign_keys' usar,
-    # já que a tabela 'Membro' pode ter várias ligações.
     criador = db.relationship("Membro", foreign_keys=[criador_id])
     
-    # --- CORREÇÃO 2 ---
-    # Faltava este relacionamento de volta para ResgateRecompensa
     resgates = db.relationship("ResgateRecompensa", back_populates="recompensa", lazy=True)
 
 
@@ -207,8 +199,6 @@ class ResgateRecompensa(db.Model):
     status = db.Column(db.String(20), nullable=False, default=ResgateStatus.PENDING)
     criadoEm = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    # --- CORREÇÃO 3 ---
-    # Adicionamos o 'back_populates' para completar a ligação
     recompensa = db.relationship("Recompensa", back_populates="resgates")
     membro = db.relationship("Membro", back_populates="resgates")
 
@@ -220,7 +210,7 @@ class Notificacao(db.Model):
     tipo = db.Column(db.String(50), nullable=False)
     mensagem = db.Column(db.String(255), nullable=False)
     enviadaEm = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    lidaEm = db.Column(db.DateTime, nullable=True) # Nulo se não foi lida
+    lidaEm = db.Column(db.DateTime, nullable=True) 
     
     # Chave Estrangeira
     usuario_id = db.Column(db.String(36), db.ForeignKey('usuario.id'), nullable=False)
