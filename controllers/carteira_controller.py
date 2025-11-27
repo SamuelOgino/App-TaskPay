@@ -10,10 +10,8 @@ from models.models import (
     Submissao, SubmissionStatus, Usuario, Notificacao
 )
 
-# Blueprint para Carteira e Perfil
 carteira_bp = Blueprint("carteira", __name__, url_prefix="/wallet")
 
-# --- Auxiliar ---
 def _get_current_member():
     uid = session.get("user_id")
     role = session.get("role")
@@ -21,22 +19,18 @@ def _get_current_member():
     return Membro.query.filter_by(usuario_id=uid, role=role).first()
 
 # ==========================================================
-# VCP 09 - CONSULTAR SALDO E PERFIL (Geral)
+# VCP09 - CONSULTAR SALDO E PERFIL (Geral)
 # ==========================================================
-
 @carteira_bp.get("/profile")
 def profile_page():
     """
     Rota inteligente: detecta se é PAI ou FILHO e mostra o perfil correto.
-    Substitui as rotas antigas /parent/profile e /child/profile.
     """
     membro = _get_current_member()
     if not membro:
         return redirect(url_for("login.login_page"))
 
-    # --- LÓGICA DO FILHO (XP, Nível, Streak, Saldo) ---
     if membro.role == Role.CHILD:
-        # Garante estruturas
         progresso = membro.progresso or Progresso(membro_id=membro.id)
         if not membro.progresso: db.session.add(progresso)
         
@@ -44,7 +38,6 @@ def profile_page():
         if not membro.carteira: db.session.add(carteira)
         db.session.commit()
 
-        # Cálculo do Streak (Foguinho)
         is_streak_active = False
         streak_dias = 0
         submissoes_aprovadas = db.session.query(Submissao.aprovadaEm).join(Submissao.tarefa).filter(
@@ -69,7 +62,6 @@ def profile_page():
                     elif (data_referencia - proxima_data).days > 1:
                         break
 
-        # Dados de XP
         current_xp = progresso.xp
         max_xp = 1000
         xp_percent = (current_xp / max_xp) * 100 if max_xp > 0 else 0
@@ -94,7 +86,6 @@ def profile_page():
             tarefas_concluidas_count=tarefas_concluidas_count
         )
 
-    # --- LÓGICA DO PAI (Resumo dos Filhos) ---
     else:
         filhos = Membro.query.filter_by(familia_id=membro.familia_id, role=Role.CHILD).all()
         filhos_data = [] 
@@ -103,20 +94,17 @@ def profile_page():
             carteira_f = filho.carteira or Carteira(membro_id=filho.id, saldo=0)
             if not filho.carteira: db.session.add(carteira_f)
             
-            # Tarefas Concluídas
             concluidas = Submissao.query.join(Submissao.tarefa).filter(
                 Submissao.tarefa.has(executor_id=filho.id),
                 Submissao.status == SubmissionStatus.APPROVED
             ).count()
             
-            # Total Ganho (Histórico)
             total_ganho = db.session.query(func.sum(Transacao.valor)).filter(
                 Transacao.carteira_id == carteira_f.id,
                 Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
             ).scalar() or 0.0
 
-            # Lógica Streak simplificada para visualização do pai
-            is_streak = False # (Pode replicar a lógica acima se quiser exibir o fogo para o pai)
+            is_streak = False 
             
             filhos_data.append({
                 "membro": filho,
@@ -135,9 +123,6 @@ def profile_page():
             plano_atual=plano_atual
         )
 
-# ==========================================================
-# VCP 09 - DETALHES FINANCEIROS (Visão do Pai)
-# ==========================================================
 
 @carteira_bp.get("/details/<child_id>")
 def child_detail(child_id):
@@ -157,13 +142,11 @@ def child_detail(child_id):
         db.session.add(carteira)
         db.session.commit()
 
-    # Total Ganho (Tarefas + Mesada)
     total_ganho = db.session.query(func.sum(Transacao.valor)).filter(
         Transacao.carteira_id == carteira.id,
         Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
     ).scalar() or 0.0
 
-    # Total Pago pelo pai (Saques)
     total_pago_historico = db.session.query(func.sum(Transacao.valor)).filter(
         Transacao.carteira_id == carteira.id,
         Transacao.tipo == 'DEBIT_PAYMENT' 
@@ -171,7 +154,6 @@ def child_detail(child_id):
 
     saldo_devedor = carteira.saldo
 
-    # Histórico Recente
     historico = Transacao.query.filter_by(carteira_id=carteira.id)\
         .order_by(Transacao.criadoEm.desc())\
         .limit(10).all()
@@ -187,7 +169,6 @@ def child_detail(child_id):
 
 @carteira_bp.post("/pay/<child_id>")
 def pay_child_submit(child_id):
-    """Pai registra um pagamento manual (Mesada/Pix)."""
     parent = _get_current_member()
     if not parent or parent.role != Role.PARENT:
         return redirect(url_for("login.login_page"))
@@ -210,7 +191,6 @@ def pay_child_submit(child_id):
     elif valor_pagar > carteira.saldo:
         flash(f"Você não pode pagar mais do que deve (R$ {carteira.saldo}).", "error")
     else:
-        # Abate do saldo e registra transação
         carteira.saldo -= valor_pagar
         transacao = Transacao(
             tipo='DEBIT_PAYMENT',
@@ -231,11 +211,6 @@ def pay_child_submit(child_id):
 
     return redirect(url_for("carteira.child_detail", child_id=child_id))
 
-
-# ==========================================================
-# EDIÇÃO DE PERFIL (Foto e Nome) - Comum a Pai e Filho
-# ==========================================================
-
 @carteira_bp.get("/edit")
 def edit_profile_page():
     """Exibe tela de edição de perfil."""
@@ -253,13 +228,11 @@ def edit_profile_submit():
     
     usuario = membro.usuario
 
-    # 1. Atualiza Nome
     novo_nome = request.form.get("nome")
     if novo_nome and novo_nome.strip() != usuario.nome:
         usuario.nome = novo_nome.strip()
         flash("Nome atualizado!", "success")
 
-    # 2. Atualiza Foto
     foto = request.files.get('foto_perfil')
     if foto and foto.filename != '':
         try:
@@ -270,13 +243,9 @@ def edit_profile_submit():
             os.makedirs(caminho_dir, exist_ok=True)
             foto.save(os.path.join(caminho_dir, nome_final))
             
-            # Remove foto antiga se existir
             if usuario.avatarUrl:
-                # Lógica simples de limpeza (opcional)
                 pass 
 
-            # Salva caminho relativo (ex: uploads/avatars/foto.jpg)
-            # O replace garante barras normais mesmo no Windows
             usuario.avatarUrl = os.path.join('uploads', 'avatars', nome_final).replace("\\", "/")
             flash("Foto atualizada!", "success")
         except Exception as e:

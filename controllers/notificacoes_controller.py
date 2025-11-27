@@ -9,11 +9,8 @@ from models.models import (
     ResgateRecompensa, ResgateStatus
 )
 
-# Blueprint para Home e Notificações
-# O prefixo /home organiza as rotas principais dos dashboards
 notificacoes_bp = Blueprint("notificacoes", __name__, url_prefix="/home")
 
-# --- Função Auxiliar de Segurança ---
 def _get_member(role_required):
     """Retorna o membro logado se corresponder ao papel exigido (PARENT ou CHILD)."""
     uid = session.get("user_id")
@@ -37,29 +34,23 @@ def home_parent():
     if not parent_member:
         return redirect(url_for("login.login_page"))
 
-    # 1. Identifica os filhos da família
     filhos = Membro.query.filter_by(familia_id=parent_member.familia_id, role=Role.CHILD).all()
     filhos_ids = [f.id for f in filhos]
     
-    # 2. Cálculos Financeiros da Família
     total_prometido = 0.0
     total_pago = 0.0
     
     if filhos_ids:
-        # Total Prometido: Soma de tudo que entrou nas carteiras (Tarefas + Mesadas)
         total_prometido = db.session.query(func.sum(Transacao.valor)).join(Carteira).filter(
             Carteira.membro_id.in_(filhos_ids),
             Transacao.tipo.in_([TransactionType.CREDIT_TASK, TransactionType.CREDIT_ALLOWANCE])
         ).scalar() or 0.0
 
-        # Total Pago: Soma do que saiu como pagamento real (DEBIT_PAYMENT)
         total_pago = db.session.query(func.sum(Transacao.valor)).join(Carteira).filter(
             Carteira.membro_id.in_(filhos_ids),
             Transacao.tipo == 'DEBIT_PAYMENT'
         ).scalar() or 0.0
 
-    # 3. LISTA DE APROVAÇÃO (O conflito mantido)
-    # Busca tarefas com submissão PENDING para o pai aprovar direto na Home
     tarefas_para_avaliar = []
     if filhos_ids:
         tarefas_para_avaliar = Submissao.query.join(Tarefa).filter(
@@ -67,7 +58,6 @@ def home_parent():
             Submissao.status == SubmissionStatus.PENDING
         ).order_by(Submissao.enviadaEm.asc()).all()
 
-    # 4. Tarefas que os filhos ainda têm que fazer (Pendentes Ativas) - Apenas visualização
     tarefas_pendentes = []
     if filhos_ids:
         tarefas_pendentes = Tarefa.query.filter(
@@ -75,7 +65,6 @@ def home_parent():
             Tarefa.status == TaskStatus.ATIVA
         ).order_by(Tarefa.prazo.asc()).all()
 
-    # 5. Notificações não lidas do Pai (VCP 11)
     notificacoes = Notificacao.query.filter_by(
         usuario_id=parent_member.usuario_id, 
         lidaEm=None
@@ -87,7 +76,7 @@ def home_parent():
         total_prometido=total_prometido,
         total_pago=total_pago,
         tarefas_pendentes=tarefas_pendentes,
-        tarefas_para_avaliar=tarefas_para_avaliar, # Enviando a lista de aprovação para o HTML
+        tarefas_para_avaliar=tarefas_para_avaliar, 
         notificacoes=notificacoes
     )
 
@@ -107,7 +96,6 @@ def home_child():
     if not child_member:
         return redirect(url_for("login.login_page"))
 
-    # Garante que existem registros de Progresso e Carteira
     if not child_member.progresso:
         db.session.add(Progresso(membro_id=child_member.id))
     if not child_member.carteira:
@@ -126,18 +114,15 @@ def home_child():
     unread_count = len(notificacoes_db)
     notificacoes_novas = list(notificacoes_db)
 
-    # Marca todas como lidas
     if notificacoes_db:
         for n in notificacoes_db:
             n.lidaEm = datetime.utcnow()
         db.session.commit()
 
-    # 2. Dados de XP e Nível
     current_xp = progresso.xp
     max_xp = 1000
     xp_percent = (current_xp / max_xp) * 100 if max_xp > 0 else 0
 
-    # 3. Lógica do Foguinho (Streak)
     is_streak_active = False
     if progresso.ultimaTarefaEm:
         agora = datetime.utcnow()
@@ -145,24 +130,19 @@ def home_child():
         if agora < limite_streak:
             is_streak_active = True
 
-    # 4. Dados Financeiros Completos
     saldo_atual = carteira.saldo
     
-    # A. Soma ganhos com tarefas (Aprovadas)
     soma_tarefas = db.session.query(func.sum(Transacao.valor)).filter(
         Transacao.carteira_id == carteira.id,
         Transacao.tipo == TransactionType.CREDIT_TASK
     ).scalar() or 0.0
 
-    # --- CORREÇÃO AQUI: Adicionando as variáveis que faltavam ---
     
-    # B. Soma valor perdido em tarefas rejeitadas
     soma_rejeitadas = db.session.query(func.sum(Tarefa.valorBase)).join(Submissao).filter(
         Tarefa.executor_id == child_member.id,
         Submissao.status == SubmissionStatus.REJECTED
     ).scalar() or 0.0
 
-    # C. Soma XP já gasto na loja (Para estatística)
     soma_xp_gasto = db.session.query(func.sum(ResgateRecompensa.xpPago)).filter(
         ResgateRecompensa.membro_id == child_member.id,
         ResgateRecompensa.status != ResgateStatus.REJECTED
@@ -170,7 +150,6 @@ def home_child():
 
     # -----------------------------------------------------------
 
-    # 5. Listas de Tarefas
     tarefas_pendentes = Tarefa.query.filter(
         Tarefa.executor_id == child_member.id,
         Tarefa.status == TaskStatus.ATIVA
@@ -189,7 +168,6 @@ def home_child():
         saldo_atual=saldo_atual,
         soma_tarefas=soma_tarefas,
         
-        # Passando as variáveis recuperadas para o HTML
         soma_rejeitadas=soma_rejeitadas, 
         soma_xp_gasto=soma_xp_gasto,
         
@@ -202,7 +180,7 @@ def home_child():
 # ==========================================================
 # GERENCIAMENTO DE NOTIFICAÇÕES (Ações)
 # ==========================================================
-
+# VCP11 - Notificações:
 @notificacoes_bp.get("/read/<notif_id>")
 def mark_read(notif_id):
     """Marca uma notificação específica como lida manualmente."""
@@ -210,12 +188,10 @@ def mark_read(notif_id):
     if not uid: return redirect(url_for("login.login_page"))
     
     n = Notificacao.query.get(notif_id)
-    # Garante que a notificação pertence ao usuário logado
     if n and n.usuario_id == uid:
         n.lidaEm = datetime.utcnow()
         db.session.commit()
         
-    # Redireciona de volta para a Home correta
     if session.get("role") == Role.CHILD:
         return redirect(url_for("notificacoes.home_child"))
     return redirect(url_for("notificacoes.home_parent"))

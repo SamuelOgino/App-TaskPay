@@ -6,10 +6,8 @@ from models.models import (
     Membro, Role, Recompensa, ResgateRecompensa, ResgateStatus, Notificacao
 )
 
-# Blueprint para Resgate e Gerenciamento de Recompensas
 resgatar_bp = Blueprint("resgatar", __name__, url_prefix="/rewards")
 
-# --- Auxiliar ---
 def _get_current_member():
     uid = session.get("user_id")
     role = session.get("role")
@@ -30,7 +28,6 @@ def shop_page():
     if not membro or membro.role != Role.CHILD:
         return redirect(url_for("login.login_page"))
     
-    # 1. Busca Histórico (Regra das 36h)
     limite_tempo = datetime.utcnow() - timedelta(hours=36)
     historico_resgates = db.session.query(ResgateRecompensa).filter(
         ResgateRecompensa.membro_id == membro.id,
@@ -43,7 +40,6 @@ def shop_page():
         )
     ).order_by(ResgateRecompensa.criadoEm.desc()).all()
     
-    # 2. Filtra a Loja (Esconde o que já foi pedido pela família toda e ainda está ativo)
     resgates_familia = db.session.query(ResgateRecompensa.recompensa_id)\
         .join(Membro, ResgateRecompensa.membro_id == Membro.id)\
         .filter(Membro.familia_id == membro.familia_id)\
@@ -66,7 +62,9 @@ def shop_page():
         now=datetime.utcnow(),
         plano_atual=membro.familia.plano
     )
-
+#=====================================================
+# VCP10 - Resgatar Recompensa:
+# Filho gasta XP, cria pedido PENDING, notifica pais.
 @resgatar_bp.post("/redeem/<recompensa_id>")
 def redeem_reward(recompensa_id):
     """
@@ -78,7 +76,6 @@ def redeem_reward(recompensa_id):
     
     recompensa = db.session.get(Recompensa, recompensa_id)
     
-    # Validações
     if not recompensa or recompensa.familia_id != membro.familia_id:
         flash("Recompensa inválida.", "error")
         return redirect(url_for("resgatar.shop_page"))
@@ -88,10 +85,8 @@ def redeem_reward(recompensa_id):
         return redirect(url_for("resgatar.shop_page"))
         
     try:
-        # 1. Deduz o XP (Pagamento antecipado)
         membro.saldoXP -= recompensa.custoXP
         
-        # 2. Cria o registro de resgate
         resgate = ResgateRecompensa(
             recompensa_id=recompensa.id,
             membro_id=membro.id,
@@ -100,7 +95,6 @@ def redeem_reward(recompensa_id):
         )
         db.session.add(resgate)
         
-        # 3. Notifica os pais
         pais = Membro.query.filter_by(familia_id=membro.familia_id, role=Role.PARENT).all()
         for pai in pais:
             notif = Notificacao(
@@ -135,14 +129,11 @@ def manage_page():
     
     filhos = Membro.query.filter_by(familia_id=membro.familia_id, role=Role.CHILD).all()
     
-    # 1. Resumo de XP para o cabeçalho
     xp_por_filho = [{
         "id": f.id, "nome": f.usuario.nome, 
         "xp": (f.saldoXP or 0), "avatar": f.usuario.avatarUrl
     } for f in filhos]
     
-    # 2. Recompensas Ativas (Disponíveis para compra) - Apenas visualização
-    # (Similar à lógica do filho, esconde as que já foram resgatadas)
     resgates_familia = db.session.query(ResgateRecompensa.recompensa_id)\
         .join(Membro, ResgateRecompensa.membro_id == Membro.id)\
         .filter(Membro.familia_id == membro.familia_id).all()
@@ -153,7 +144,6 @@ def manage_page():
         query_ativas = query_ativas.filter(Recompensa.id.notin_(ids_ja_resgatados))
     ativas = query_ativas.order_by(Recompensa.criadoEm.desc()).all()
     
-    # 3. Histórico de Pedidos (Onde o pai clica para entregar)
     limite_tempo = datetime.utcnow() - timedelta(hours=36)
     historico = (ResgateRecompensa.query
         .join(Membro).join(Recompensa)
@@ -174,12 +164,10 @@ def manage_page():
         plano_atual=membro.familia.plano
     )
 
+# VCP10 - Resgatar Recompensa:
+# Pai entrega (DELIVERED) ou rejeita (REJECTED) retornando XP ao filho.
 @resgatar_bp.get("/deliver/<resgate_id>")
 def deliver_reward(resgate_id):
-    """
-    Ação do Pai: Marcar como ENTREGUE.
-    Confirma que o filho recebeu o prêmio. O XP já foi gasto.
-    """
     parent = _get_current_member()
     if not parent or parent.role != Role.PARENT: return redirect(url_for("login.login_page"))
     
@@ -203,12 +191,10 @@ def deliver_reward(resgate_id):
         
     return redirect(url_for("resgatar.manage_page"))
 
+# VCP10 - Resgatar Recompensa:
+# Pai entrega (DELIVERED) ou rejeita (REJECTED) retornando XP ao filho.
 @resgatar_bp.get("/reject/<resgate_id>")
 def reject_reward(resgate_id):
-    """
-    Ação do Pai: REJEITAR pedido.
-    IMPORTANTE: Devolve o XP gasto para a conta do filho.
-    """
     parent = _get_current_member()
     if not parent or parent.role != Role.PARENT: return redirect(url_for("login.login_page"))
     
@@ -221,14 +207,11 @@ def reject_reward(resgate_id):
         return redirect(url_for("resgatar.manage_page"))
 
     try:
-        # 1. Marca rejeitado
         resgate.status = ResgateStatus.REJECTED
         
-        # 2. REEMBOLSO DE XP
         filho = resgate.membro
         filho.saldoXP = (filho.saldoXP or 0) + resgate.xpPago
         
-        # 3. Notifica
         notif = Notificacao(
             tipo="RECOMPENSA_REJEITADA",
             mensagem=f"Pedido de '{resgate.recompensa.titulo}' cancelado. {resgate.xpPago} XP devolvidos.",
