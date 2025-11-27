@@ -7,16 +7,13 @@ from models.models import (
     Membro, Role, Tarefa, TaskStatus, Submissao, SubmissionStatus, 
     Notificacao, Carteira, Transacao, TransactionType, Progresso
 )
-
 taskssubmission_bp = Blueprint("taskssubmission", __name__, url_prefix="/submission")
-
 # --- Função Auxiliar de Segurança ---
 def _get_current_member():
     uid = session.get("user_id")
     role = session.get("role")
     if not uid or not role: return None
     return Membro.query.filter_by(usuario_id=uid, role=role).first()
-
 # ==========================================================
 # ÁREA DO PAI - VCP 08 (Validar/Rejeitar)
 # ==========================================================
