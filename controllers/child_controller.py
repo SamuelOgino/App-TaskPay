@@ -27,11 +27,9 @@ def _get_parent_members(familia_id):
     """Busca todos os membros PAIS de uma família."""
     if not familia_id: return []
     return Membro.query.filter_by(familia_id=familia_id, role=Role.PARENT).all()
-
-# 3. Rota "home" do filho
 @bp.get("/home")
 def home():
-    """Exibe a página inicial do FILHO com XP, Saldo e Foguinho."""
+    """Exibe a página inicial do FILHO com notificações que somem."""
     guard = _require_child()
     if guard: return guard
     
@@ -40,7 +38,10 @@ def home():
         flash("Erro de sessão. Por favor, faça login novamente.", "error")
         return redirect(url_for("auth.login_page"))
 
-    # LÓGICA DO BANCO DE DADOS 
+    # 1. BUSCA O OBJETO MEMBRO (Essencial para pegar o usuario_id correto)
+    membro = Membro.query.get(membro_id)
+
+    # Garante progresso e carteira (Seu código original)
     progresso = Progresso.query.filter_by(membro_id=membro_id).first()
     if not progresso:
         progresso = Progresso(membro_id=membro_id)
@@ -51,12 +52,36 @@ def home():
         db.session.add(carteira)
     db.session.commit()
 
-    # Lógica do XP
+    # --- LÓGICA DE NOTIFICAÇÃO (CORRIGIDA) ---
+
+    # A. Busca APENAS as que não foram lidas (lidaEm é None)
+    notificacoes_db = Notificacao.query.filter_by(
+        usuario_id=membro.usuario_id, 
+        lidaEm=None
+    ).order_by(Notificacao.enviadaEm.desc()).all()
+
+    # B. Conta quantas são para exibir no sininho (antes de limpar)
+    unread_count = len(notificacoes_db)
+
+    # C. Cria uma cópia da lista para enviar ao HTML (Isso é crucial!)
+    #    Precisamos da cópia porque vamos alterar o banco logo em seguida.
+    notificacoes_novas = list(notificacoes_db)
+
+    # D. MARCA COMO LIDA NO BANCO DE DADOS AGORA
+    #    Assim, se der F5 na página depois, a lista 'notificacoes_db' virá vazia.
+    if notificacoes_db:
+        for n in notificacoes_db:
+            n.lidaEm = datetime.utcnow()
+        db.session.commit() 
+
+    # --- FIM DA LÓGICA DE NOTIFICAÇÃO ---
+
+
+    # (O RESTO DO SEU CÓDIGO SEGUE IGUAL ABAIXO...)
     current_xp = progresso.xp
     max_xp = 1000
     xp_percent = (current_xp / max_xp) * 100 if max_xp > 0 else 0
     
-    # Lógica do Foguinho
     is_streak_active = False
     if progresso.ultimaTarefaEm:
         agora = datetime.utcnow()
@@ -64,7 +89,6 @@ def home():
         if agora < limite_streak:
             is_streak_active = True
     
-    # Lógica do Saldo e Transações
     saldo_atual = carteira.saldo
     soma_tarefas = db.session.query(func.sum(Transacao.valor)).filter(
         Transacao.carteira_id == carteira.id,
@@ -76,23 +100,16 @@ def home():
     ).scalar() or 0.0
     soma_xp_gasto = db.session.query(func.sum(ResgateRecompensa.xpPago)).filter(
         ResgateRecompensa.membro_id == membro_id,
-        ResgateRecompensa.status != ResgateStatus.REJECTED # Conta Pending e Delivered
+        ResgateRecompensa.status != ResgateStatus.REJECTED
     ).scalar() or 0
     
-    # VCP06 - Visualizar Tarefas Pendentes:
-    # Filho vê todas as tarefas ATIVAS ordenadas por prazo.
     tarefas_pendentes = Tarefa.query.filter(
         Tarefa.executor_id == membro_id,
         Tarefa.status == TaskStatus.ATIVA
     ).order_by(Tarefa.prazo.asc()).all()
     
-    # Busca as 10 submissões mais recentes deste filho
     time_limit = datetime.utcnow() - timedelta(hours=8) 
     
-    # Busca tarefas enviadas que:
-    # 1. NÃO estão aprovadas (ex: PENDING, REJECTED)
-    # OU
-    # 2. Foram APROVADAS HÁ MENOS DE 1 MINUTO
     tarefas_enviadas = Submissao.query.join(Tarefa).filter(
         Tarefa.executor_id == membro_id,
         or_(
@@ -101,7 +118,6 @@ def home():
         )
     ).order_by(Submissao.enviadaEm.desc()).limit(10).all()
     
-    # Envia tudo para o HTML
     return render_template(
         "child/home.html",
         current_xp=current_xp,
@@ -113,7 +129,11 @@ def home():
         soma_rejeitadas=soma_rejeitadas,
         soma_xp_gasto=soma_xp_gasto,
         tarefas_pendentes=tarefas_pendentes,
-        tarefas_enviadas=tarefas_enviadas
+        tarefas_enviadas=tarefas_enviadas,
+        
+        # AQUI ESTÁ A CHAVE: Enviamos a lista de novas para o HTML
+        notificacoes_novas=notificacoes_novas,
+        unread_count=unread_count
     )
 
 @bp.get("/profile")
@@ -207,7 +227,7 @@ def profile_page():
         is_streak_active=is_streak_active, # Nova variável
         streak_dias=streak_dias,           # Nova variável
         xp_total_acumulado=xp_total_acumulado,
-        tarefas_concluidas_count=tarefas_concluidas_count
+        tarefas_concluidas_count=tarefas_concluidas_count,
     )
 
 @bp.get("/profile/edit")

@@ -1,3 +1,4 @@
+{% from 'shared/_macros.html' import flash_messages %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,23 +8,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home_child.css') }}">
     <link rel="manifest" href="/manifest.json">
-    
 </head>
 <body>
 
-    <div class="phone">
-
-        <header class="app-header">
+    <div class="phone"> <header class="app-header">
+            {{ flash_messages() }}
             <a href="{{ url_for('auth.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
             </div>
-            <!-- <i class="fa-solid fa-user"></i> -->
+            <div style="width: 24px;"></div> 
         </header>
 
-        <main class="content-area">
+        {% if notificacoes_novas %}
+        <div id="toast-container">
+            {% for n in notificacoes_novas %}
+                {% set card_class = 'info' %}
+                {% set icon_class = 'fa-comment-dots' %}
+                {% set icon_color = '#64748b' %}
 
+                {% if n.tipo == 'TAREFA_APROVADA' %}
+                    {% set card_class = 'success' %}
+                    {% set icon_class = 'fa-circle-check' %}
+                    {% set icon_color = '#22c55e' %}
+                {% elif n.tipo == 'RECOMPENSA_ENTREGUE' %}
+                    {% set card_class = 'success' %}
+                    {% set icon_class = 'fa-gift' %}
+                    {% set icon_color = '#f59e0b' %}
+                {% elif n.tipo == 'NOVA_TAREFA' %}
+                    {% set card_class = 'info' %}
+                    {% set icon_class = 'fa-clipboard-list' %}
+                    {% set icon_color = '#3b82f6' %}
+                {% elif n.tipo == 'TAREFA_REJEITADA' or n.tipo == 'RECOMPENSA_REJEITADA' %}
+                    {% set card_class = 'danger' %}
+                    {% set icon_class = 'fa-circle-xmark' %}
+                    {% set icon_color = '#ef4444' %}
+                {% endif %}
+
+                <div class="toast-notification {{ card_class }}">
+                    <div class="toast-icon">
+                        <i class="fa-solid {{ icon_class }}" style="color: {{ icon_color }};"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-msg">{{ n.mensagem }}</div>
+                        <div class="toast-time">{{ n.enviadaEm.strftime('%H:%M') }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <main class="content-area">
+            
             <h2 class="page-title">Início</h2> 
             
             <div class="card xp-card">
@@ -33,7 +69,6 @@
                         <div class="progress-bar-inner" style="width: {{ xp_percent }}%;"></div>
                     </div>
                 </div>
-
                 <div class="streak-container {{ 'fire-on' if is_streak_active else 'fire-off' }}">
                     <i class="fa-solid fa-fire-flame-curved"></i>
                 </div>
@@ -41,103 +76,54 @@
             
             <div class="card balance-card">
                 <div class="balance-header">
-                    <div>
-                        <h3 class="title">Saldo da Mesada</h3>
-                    </div>
-                    
-                    <div class="balance-amount">
-                        R$ {{ "%.2f"|format(saldo_atual|float) }}
-                    </div>
+                    <div><h3 class="title">Saldo da Mesada</h3></div>
+                    <div class="balance-amount">R$ {{ "%.2f"|format(saldo_atual|float) }}</div>
                 </div>
                 <ul class="balance-details">
                     <li>Tarefas concluídas: <span>+ R$ {{ "%.2f"|format(saldo_atual|float) }}</span></li>
-                    
                     <li>Tarefas rejeitadas: <span>- R$ {{ "%.2f"|format(soma_rejeitadas|float) }}</span></li>
-                    
                     <li>Recompensas resgatadas: <span style="color: #ef4444;">- {{ soma_xp_gasto }} XP</span></li>
                 </ul>
             </div>
-            
 
             <section class="task-section">
                 <h3 class="section-title">Tarefas Pendentes</h3>
-
                 {% if tarefas_pendentes %}
                     {% for tarefa in tarefas_pendentes %}
-
-                        <a href="{{ url_for('child.tasks_page', _anchor='tarefa-' + tarefa.id) }}" class="card task-card
-                            {% if tarefa.prioridade == 'ALTA' %}
-                                priority-ALTA
-                            {% elif tarefa.prioridade == 'MEDIA' %}
-                                priority-MEDIA
-                            {% elif tarefa.prioridade == 'BAIXA' %}
-                                priority-BAIXA
-                            {% endif %}
-                        ">
-
+                        <a href="{{ url_for('child.tasks_page', _anchor='tarefa-' + tarefa.id) }}" class="card task-card {% if tarefa.prioridade == 'ALTA' %} priority-ALTA {% elif tarefa.prioridade == 'MEDIA' %} priority-MEDIA {% elif tarefa.prioridade == 'BAIXA' %} priority-BAIXA {% endif %}">
                             <i class="fa-solid {{ tarefa.icone or 'fa-list-check' }} task-icon"></i>
-
                             <div class="task-info">
                                 <div class="task-title">{{ tarefa.titulo }}</div>
-
-                                <div class="task-meta">
-                                    {% if tarefa.prazo %}
-                                        Vence: {{ tarefa.prazo.strftime('%d/%m') }}
-                                    {% else %}
-                                        Sem prazo
-                                    {% endif %}
-                                </div>
+                                <div class="task-meta">{% if tarefa.prazo %}Vence: {{ tarefa.prazo.strftime('%d/%m') }}{% else %}Sem prazo{% endif %}</div>
                             </div>
-
-                            <div class="task-amount">
-                                R$ {{ "%.2f"|format(tarefa.valorBase|float) }}
-                            </div>
+                            <div class="task-amount">R$ {{ "%.2f"|format(tarefa.valorBase|float) }}</div>
                         </a>
                     {% endfor %}
-
                 {% else %}
                     <div class="card empty-state">
                         <i class="fa-regular fa-circle-check"></i>
                         <p>Tudo em dia! Nenhuma tarefa pendente.</p>
                     </div>
                 {% endif %}
-                </section>
+            </section>
             
             <section class="task-section">
                 <h3 class="section-title">Tarefas Enviadas</h3>
-
                 {% if tarefas_enviadas %}
                     {% for submissao in tarefas_enviadas %}
                         <div class="card task-sent-card {{ submissao.status|lower }}">
-                            
                             <div class="task-info">
                                 <div class="task-title">{{ submissao.tarefa.titulo }}</div>
-                                <div class="task-meta">
-                                    Enviado em: {{ submissao.enviadaEm.strftime('%d/%m/%y') }}
-                                </div>
+                                <div class="task-meta">Enviado em: {{ submissao.enviadaEm.strftime('%d/%m/%y') }}</div>
                             </div>
-                            
                             <div class="task-status-details">
                                 <div class="task-amount">
-                                    {% if submissao.status == 'REJECTED' %}
-                                        -R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}
-                                    {% else %}
-                                        +R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}
-                                    {% endif %}
+                                    {% if submissao.status == 'REJECTED' %}-R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}{% else %}+R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}{% endif %}
                                 </div>
                                 <div class="status-text">
-                                    {% if submissao.status == 'PENDING' %}
-                                        Aguardando aprovação
-                                    {% elif submissao.status == 'APPROVED' %}
-                                        Aprovado
-                                    {% elif submissao.status == 'REJECTED' %}
-                                        Rejeitado
-                                    {% else %}
-                                        {{ submissao.status }}
-                                    {% endif %}
+                                    {% if submissao.status == 'PENDING' %}Aguardando aprovação{% elif submissao.status == 'APPROVED' %}Aprovado{% elif submissao.status == 'REJECTED' %}Rejeitado{% else %}{{ submissao.status }}{% endif %}
                                 </div>
                             </div>
-                            
                         </div>
                     {% endfor %}
                 {% else %}
@@ -147,39 +133,31 @@
                     </div>
                 {% endif %}
             </section>
-            
-            <!-- <div class="quick-links">
-                <a href="#">Ver recompensas disponíveis</a>
-                <a href="#">Ver relatórios</a>
-            </div> -->
-
-           <!-- <a href="{{ url_for('auth.login_page') }}" class="back-link">Sair (Voltar ao Login)</a> --> 
-
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('child.home') }}" class="nav-item active">
-                <i class="fa-solid fa-house"></i>
-                <span>Início</span>
-            </a>
-            
-            <a href="{{ url_for('child.tasks_page') }}" class="nav-item"> 
-                 <i class="fa-solid fa-list-check"></i>
-                 <span>Tarefas</span>
-            </a>
-            
-            <a href="{{ url_for('child.rewards_page') }}" class="nav-item"> 
-                <i class="fa-solid fa-gift"></i>
-                <span>Recompensas</span>
-            </a>
-            
-            <a href="{{ url_for('child.profile_page') }}" class="nav-item">
-                <i class="fa-solid fa-user"></i>
-                <span>Perfil</span>
-            </a>
+            <a href="{{ url_for('child.home') }}" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
+            <a href="{{ url_for('child.tasks_page') }}" class="nav-item"><i class="fa-solid fa-list-check"></i><span>Tarefas</span></a>
+            <a href="{{ url_for('child.rewards_page') }}" class="nav-item"><i class="fa-solid fa-gift"></i><span>Recompensas</span></a>
+            <a href="{{ url_for('child.profile_page') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
         </footer>
-
-    </div>
+    </div> <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast-notification');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.add('hiding');
+                    toast.addEventListener('animationend', () => {
+                        toast.remove();
+                        const container = document.getElementById('toast-container');
+                        if (container && container.children.length === 0) {
+                            container.remove();
+                        }
+                    });
+                }, 8000);
+            });
+        });
+    </script>
 
 </body>
 </html>
