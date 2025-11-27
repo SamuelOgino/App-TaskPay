@@ -17,7 +17,7 @@
         <header class="app-header">
             {{ flash_messages() }}
             
-            <a href="{{ url_for('child.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('notificacoes.home_child') }}"><i class="fa-solid fa-arrow-left"></i></a>
             
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
@@ -136,7 +136,7 @@
                                         <div class="reward-cost">{{ item.custoXP }} XP</div>
                                     </div>
                                     
-                                    <form action="{{ url_for('child.redeem_reward', recompensa_id=item.id) }}" method="POST">
+                                    <form action="{{ url_for('resgatar.redeem_reward', recompensa_id=item.id) }}" method="POST">
                                         <button type="submit" class="btn-redeem" 
                                             {% if xp_atual < item.custoXP %}disabled{% endif %}>
                                             {% if xp_atual < item.custoXP %}
@@ -160,19 +160,19 @@
             </div> </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('child.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_child') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
-            <a href="{{ url_for('child.tasks_page') }}" class="nav-item"> 
+            <a href="{{ url_for('taskspending.tasks_page') }}" class="nav-item"> 
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
-            <a href="{{ url_for('child.rewards_page') }}" class="nav-item active">
+            <a href="{{ url_for('resgatar.shop_page') }}" class="nav-item active">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('child.profile_page') }}" class="nav-item">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

@@ -14,13 +14,13 @@
 <body>
     <div class="phone">
         <header>
-            <a href="{{ url_for('parent.home') }}" style="color:white"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('notificacoes.home_parent') }}" style="color:white"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="title">Nova Tarefa</div>
         </header>
 
         <main>
             {{ flash_messages() }}
-            <form method="post" action="{{ url_for('parent.create_task') }}">
+            <form method="post" action="{{ url_for('newtask.create_task') }}">
                 <div class="card">
                     <label>Nome da Tarefa</label>
                     <input type="text" name="titulo" placeholder="Ex: Arrumar a cama" required>

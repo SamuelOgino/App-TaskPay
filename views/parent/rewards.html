@@ -15,7 +15,7 @@
   <div class="phone">
     <header class="app-header">
       {{ flash_messages() }}
-      <a href="{{ url_for('parent.home') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
+      <a href="{{ url_for('notificacoes.home_parent') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
       <div class="logo"><i class="fa-solid fa-list"></i><span>TaskPay</span></div>
     </header>
 
@@ -30,7 +30,7 @@
               <h3 class="lock-title">Funcionalidade PRO</h3>
               <p class="lock-desc">A Loja de Recompensas e o Controle de XP são exclusivos para assinantes Premium.</p>
               
-              <a href="{{ url_for('parent.plans_page') }}" class="btn primary">
+              <a href="{{ url_for('melhorarplano.plans_page') }}" class="btn primary">
                   Liberar Acesso Agora
               </a>
           </div>
@@ -41,7 +41,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <h2 class="section-title">Recompensas</h2>
-            <a class="btn green" href="{{ url_for('parent.new_reward_page') }}"><i class="fa-solid fa-plus"></i> Nova Recompensa</a>
+            <a class="btn green" href="{{ url_for('criarrecompensa.new_reward_page') }}"><i class="fa-solid fa-plus"></i> Nova Recompensa</a>
           </div>
 
           <div class="card">
@@ -89,12 +89,12 @@
                   </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     {% if h.status == 'PENDING' %}
-                        <a href="{{ url_for('parent.deliver_reward', resgate_id=h.id) }}" 
+                        <a href="{{ url_for('resgatar.deliver_reward', resgate_id=h.id) }}" 
                            onclick="return confirm('Confirmar entrega?');"
                            style="background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #bbf7d0;">
                            <i class="fa-solid fa-check"></i>
                         </a>
-                        <a href="{{ url_for('parent.reject_reward', resgate_id=h.id) }}" 
+                        <a href="{{ url_for('resgatar.reject_reward', resgate_id=h.id) }}" 
                            onclick="return confirm('Rejeitar e devolver XP?');"
                            style="background-color: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; border: 1px solid #fecaca;">
                            <i class="fa-solid fa-xmark"></i>
@@ -116,19 +116,19 @@
       </div> </main>
 
     <footer class="app-footer-nav">
-          <a href="{{ url_for('parent.home') }}" class="nav-item"> 
+          <a href="{{ url_for('notificacoes.home_parent') }}" class="nav-item"> 
             <i class="fa-solid fa-house"></i>
               <span>Início</span>
           </a>
-          <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+          <a href="{{ url_for('taskssubmission.tasks_page') }}" class="nav-item">
               <i class="fa-solid fa-list-check"></i>
               <span>Tarefas</span>
           </a>
-          <a href="{{ url_for('parent.rewards_page') }}" class="nav-item active">
+          <a href="{{ url_for('resgatar.manage_page') }}" class="nav-item active">
               <i class="fa-solid fa-gift"></i>
               <span>Recompensas</span>
           </a>
-          <a href="{{ url_for('parent.profile_page') }}" class="nav-item">
+          <a href="{{ url_for('carteira.profile_page') }}" class="nav-item">
               <i class="fa-solid fa-user"></i>
               <span>Perfil</span>
           </a>

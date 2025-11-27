@@ -15,7 +15,7 @@
 <body>
   <div class="phone">
     <header class="topbar">
-      <a href="{{ url_for('auth.login_page') }}" class="back-link">
+      <a href="{{ url_for('login.login_page') }}" class="back-link">
         <i class="fa-solid fa-arrow-left"></i>
         Voltar
       </a>
@@ -28,7 +28,7 @@
       <div class="card">
         <h1 class="title">Criar conta</h1>
 
-        <form action="{{ url_for('auth.register_submit') }}" method="post" autocomplete="on">
+        <form action="{{ url_for('cadastro.register_submit') }}" method="post" autocomplete="on">
           <label class="label">Nome</label>
           <input class="input" type="text" name="name" placeholder="Seu nome completo" required>
 
@@ -54,7 +54,7 @@
             <button class="btn success" type="submit">Cadastrar</button>
           </div>
           <div style="margin-top:8px">
-            <a class="btn ghost" href="{{ url_for('auth.login_page') }}">Voltar para o login</a>
+            <a class="btn ghost" href="{{ url_for('login.login_page') }}">Voltar para o login</a>
           </div>
         </form>
       </div>

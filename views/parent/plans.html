@@ -15,7 +15,7 @@
 
     <header class="app-header">
         {{ flash_messages() }}
-        <a href="{{ url_for('parent.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+        <a href="{{ url_for('notificacoes.home_parent') }}"><i class="fa-solid fa-arrow-left"></i></a>
         <div class="logo">
             <i class="fa-solid fa-list"></i>
             <span>TaskPay</span>
@@ -83,7 +83,7 @@
             </ul>
 
             {% if plano_atual == 'FREE' %}
-                <form action="{{ url_for('parent.subscribe_pro') }}" method="POST">
+                <form action="{{ url_for('melhorarplano.subscribe_pro') }}" method="POST">
                     <button type="submit" class="btn primary">Assinar PRO Agora</button>
                 </form>
             {% else %}
@@ -112,19 +112,19 @@
     </main>
 
     <footer class="app-footer-nav">
-            <a href="{{ url_for('parent.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_parent') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
-            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+            <a href="{{ url_for('taskssubmission.tasks_page') }}" class="nav-item">
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
-            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+            <a href="{{ url_for('resgatar.manage_page') }}" class="nav-item">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('parent.profile_page') }}" class="nav-item active">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item active">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

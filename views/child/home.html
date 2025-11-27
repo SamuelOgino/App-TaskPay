@@ -15,7 +15,7 @@
         
         <header class="app-header">
             {{ flash_messages() }}
-            <a href="{{ url_for('auth.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('login.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
@@ -92,7 +92,7 @@
                 <h3 class="section-title">Tarefas Pendentes</h3>
                 {% if tarefas_pendentes %}
                     {% for tarefa in tarefas_pendentes %}
-                        <a href="{{ url_for('child.tasks_page', _anchor='tarefa-' + tarefa.id) }}" class="card task-card {% if tarefa.prioridade == 'ALTA' %} priority-ALTA {% elif tarefa.prioridade == 'MEDIA' %} priority-MEDIA {% elif tarefa.prioridade == 'BAIXA' %} priority-BAIXA {% endif %}">
+                        <a href="{{ url_for('taskspending.tasks_page', _anchor='tarefa-' + tarefa.id) }}" class="card task-card {% if tarefa.prioridade == 'ALTA' %} priority-ALTA {% elif tarefa.prioridade == 'MEDIA' %} priority-MEDIA {% elif tarefa.prioridade == 'BAIXA' %} priority-BAIXA {% endif %}">
                             <i class="fa-solid {{ tarefa.icone or 'fa-list-check' }} task-icon"></i>
                             <div class="task-info">
                                 <div class="task-title">{{ tarefa.titulo }}</div>
@@ -138,10 +138,10 @@
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('child.home') }}" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
-            <a href="{{ url_for('child.tasks_page') }}" class="nav-item"><i class="fa-solid fa-list-check"></i><span>Tarefas</span></a>
-            <a href="{{ url_for('child.rewards_page') }}" class="nav-item"><i class="fa-solid fa-gift"></i><span>Recompensas</span></a>
-            <a href="{{ url_for('child.profile_page') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
+            <a href="{{ url_for('notificacoes.home_child') }}" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
+            <a href="{{ url_for('taskspending.tasks_page') }}" class="nav-item"><i class="fa-solid fa-list-check"></i><span>Tarefas</span></a>
+            <a href="{{ url_for('resgatar.shop_page') }}" class="nav-item"><i class="fa-solid fa-gift"></i><span>Recompensas</span></a>
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
         </footer>
     </div>
 

@@ -16,12 +16,11 @@
 
         <header class="app-header">
             {{ flash_messages() }}
-            <a href="{{ url_for('child.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('notificacoes.home_child') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
             </div>
-             <!-- <a href="{{ url_for('child.profile_page') }}"><i class="fa-solid fa-user"></i></a> -->
         </header>
 
         <main class="content-area">
@@ -31,7 +30,7 @@
                 <div class="profile-pic-container">
                     <img src="{{ url_for('static', filename='uploads/' + membro.usuario.avatarUrl) if membro.usuario.avatarUrl else 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' }}" alt="Foto do Perfil" class="profile-pic">
 
-                    <a href="{{ url_for('child.edit_profile_page') }}" class="edit-pic-button">
+                    <a href="{{ url_for('carteira.edit_profile_page') }}" class="edit-pic-button">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                 </div>
@@ -96,26 +95,26 @@
                     <p>Sem notificações por aqui.</p>
                 </div>
             </section>
-            <a href="{{ url_for('auth.logout') }}" class="back-link">Sair da conta</a>
+            <a href="{{ url_for('login.logout') }}" class="back-link">Sair da conta</a>
 
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('child.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_child') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
 
-           <a href="{{ url_for('child.tasks_page') }}" class="nav-item"> 
+           <a href="{{ url_for('taskspending.tasks_page') }}" class="nav-item"> 
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
 
-            <a href="{{ url_for('child.rewards_page') }}" class="nav-item">
+            <a href="{{ url_for('resgatar.shop_page') }}" class="nav-item">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('child.profile_page') }}" class="nav-item active">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item active">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

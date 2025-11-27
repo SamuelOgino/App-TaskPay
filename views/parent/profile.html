@@ -16,7 +16,7 @@
 
          <header class="app-header">
             {{ flash_messages() }}
-            <a href="{{ url_for('parent.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('notificacoes.home_parent') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
@@ -32,7 +32,7 @@
                 <div class="profile-pic-container">
                     <img src="{{ url_for('static', filename=usuario.avatarUrl) if usuario.avatarUrl else url_for('static', filename='img/icons/default_image.png') }}" alt="Foto do Perfil" class="profile-pic">
 
-                    <a href="{{ url_for('parent.edit_profile_page') }}" class="edit-pic-button">
+                    <a href="{{ url_for('carteira.edit_profile_submit') }}" class="edit-pic-button">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                 </div>
@@ -56,7 +56,7 @@
                 
                 {% if filhos_data %}
                     {% for filho_info in filhos_data %}
-                    <a href="{{ url_for('parent.child_detail', child_id=filho_info.membro.id) }}" class="card child-card">
+                    <a href="{{ url_for('carteira.child_detail', child_id=filho_info.membro.id) }}" class="card child-card">
                         
                         <div class="child-info">
                             <img src="{{ url_for('static', filename='uploads/' + filho_info.membro.usuario.avatarUrl) if filho_info.membro.usuario.avatarUrl else url_for('static', filename='img/icons/default_image.png') }}" alt="Foto do Filho" class="child-pic">
@@ -99,7 +99,7 @@
                     <span><i class="fa-solid fa-lock"></i> Configuração</span>
                     <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </a>
-                <a href="{{ url_for('parent.plans_page') }}" class="card setting-item">
+                <a href="{{ url_for('melhorarplano.plans_page') }}" class="card setting-item">
                     <span><i class="fa-solid fa-crown"></i> Planos e Assinatura</span>
                     <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </a>
@@ -109,24 +109,24 @@
                 </a>
             </section>
             
-            <a href="{{ url_for('auth.logout') }}" class="back-link">Sair da conta</a>
+            <a href="{{ url_for('login.logout') }}" class="back-link">Sair da conta</a>
 
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('parent.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_parent') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
-            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+            <a href="{{ url_for('taskssubmission.tasks_page') }}" class="nav-item">
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
-            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+            <a href="{{ url_for('resgatar.manage_page') }}" class="nav-item">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('parent.profile_page') }}" class="nav-item active">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item active">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

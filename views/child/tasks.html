@@ -17,7 +17,7 @@
 
         <header class="app-header">
              {{ flash_messages() }}
-            <a href="{{ url_for('child.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('notificacoes.home_child') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
@@ -53,7 +53,7 @@
                             <div class="submission-form-container" id="form-{{ tarefa.id }}">
                                 <div class="submission-actions">
                                     {% if tarefa.exigeFoto %}
-                                        <form action="{{ url_for('child.submit_task_photo', tarefa_id=tarefa.id) }}" 
+                                        <form action="{{ url_for('taskssubmission.submit_task_photo', tarefa_id=tarefa.id) }}" 
                                               method="POST" 
                                               enctype="multipart/form-data" 
                                               class="form-send-photo full-width">
@@ -73,7 +73,7 @@
                                             
                                         </form>
                                     {% else %}
-                                        <form action="{{ url_for('child.submit_task_simple', tarefa_id=tarefa.id) }}" method="POST" class="form-mark-done full-width">
+                                        <form action="{{ url_for('taskssubmission.submit_task_simple', tarefa_id=tarefa.id) }}" method="POST" class="form-mark-done full-width">
                                             <button type="submit" class="btn btn-success">
                                                 Marcar como feito
                                             </button>
@@ -99,22 +99,22 @@
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('child.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_child') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
             
-            <a href="{{ url_for('child.tasks_page') }}" class="nav-item active"> 
+            <a href="{{ url_for('taskspending.tasks_page') }}" class="nav-item active"> 
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
             
-            <a href="{{ url_for('child.rewards_page') }}" class="nav-item"> 
+            <a href="{{ url_for('resgatar.shop_page') }}" class="nav-item"> 
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
             
-            <a href="{{ url_for('child.profile_page') }}" class="nav-item">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

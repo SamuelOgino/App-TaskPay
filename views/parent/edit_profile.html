@@ -15,12 +15,12 @@
     <div class="phone">
 
         <header class="app-header">
-            <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('carteira.profile_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>Editar Perfil</span>
             </div>
-             <a href="{{ url_for('parent.profile_page') }}"><i class="fa-solid fa-user"></i></a>
+             <a href="{{ url_for('carteira.profile_page') }}"><i class="fa-solid fa-user"></i></a>
         </header>
 
         <main class="content-area">
@@ -29,7 +29,7 @@
 
             <form 
                 method="post" 
-                action="{{ url_for('parent.edit_profile_submit') }}" 
+                action="{{ url_for('carteira.edit_profile_submit') }}" 
                 enctype="multipart/form-data"
                 class="edit-profile-form"
             >
@@ -69,19 +69,19 @@
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('parent.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_parent') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('taskssubmission.tasks_page') }}" class="nav-item">
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
-            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+            <a href="{{ url_for('resgatar.manage_page') }}" class="nav-item">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('parent.profile_page') }}" class="nav-item active">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item active">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

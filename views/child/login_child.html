@@ -19,7 +19,7 @@
       {{ flash_messages() }}
 
       <div class="topbar">
-        <a href="{{ url_for('auth.login_page') }}" class="back-link">
+        <a href="{{ url_for('login.login_page') }}" class="back-link">
           <i class="fa-solid fa-arrow-left"></i>
           Voltar
         </a>
@@ -33,7 +33,7 @@
         <p class="subtitle">Entrar como Filho(a)</p>
       </div>
 
-      <form action="{{ url_for('auth.login_submit') }}" method="post" novalidate>
+      <form action="{{ url_for('login.login_submit') }}" method="post" novalidate>
         <input type="hidden" name="role" value="CHILD">
 
         <div class="form-group">
@@ -54,7 +54,7 @@
 
       <hr class="divider">
       <div class="signup-link">
-        Não tem uma conta? <a href="{{ url_for('auth.register_page') }}">Cadastre-se</a>
+        Não tem uma conta? <a href="{{ url_for('cadastro.register_page') }}">Cadastre-se</a>
       </div>
     </div>
   </div>

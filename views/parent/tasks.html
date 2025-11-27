@@ -14,7 +14,7 @@
     <div class="phone">
         <header class="app-header">
             {{ flash_messages() }}
-            <a href="{{ url_for('parent.home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('notificacoes.home_parent') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 <i class="fa-solid fa-list"></i>
                 <span>TaskPay</span>
@@ -58,8 +58,8 @@
                             <span>R$ {{ "%.2f"|format(submissao.tarefa.valorBase|float) }}</span>
                         </div>
                         <div class="eval-actions">
-                            <a href="{{ url_for('parent.approve_submission', submissao_id=submissao.id) }}" class="btn-eval approve">Aprovar</a>
-                            <a href="{{ url_for('parent.reject_submission', submissao_id=submissao.id) }}" class="btn-eval reject">Rejeitar</a>
+                            <a href="{{ url_for('taskssubmission.approve_submission', submissao_id=submissao.id) }}" class="btn-eval approve">Aprovar</a>
+                            <a href="{{ url_for('taskssubmission.reject_submission', submissao_id=submissao.id) }}" class="btn-eval reject">Rejeitar</a>
                         </div>
                     </div>
                     
@@ -75,18 +75,18 @@
         </main>
 
         <footer class="app-footer-nav">
-            <a href="{{ url_for('parent.home') }}" class="nav-item">
+            <a href="{{ url_for('notificacoes.home_parent') }}" class="nav-item">
                 <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
-            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item active"> <i class="fa-solid fa-list-check"></i>
+            <a href="{{ url_for('taskssubmission.tasks_page') }}" class="nav-item active"> <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
-            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+            <a href="{{ url_for('resgatar.manage_page') }}" class="nav-item">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('parent.profile_page') }}" class="nav-item">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

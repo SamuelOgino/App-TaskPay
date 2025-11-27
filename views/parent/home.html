@@ -15,7 +15,7 @@
     <div class="phone">
         <header class="app-header">
             {{ flash_messages() }}
-            <a href="{{ url_for('auth.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{ url_for('login.login_page') }}"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="logo">
                 
                 <i class="fa-solid fa-list"></i>
@@ -50,7 +50,7 @@
             <section class="task-section">
                 <div class="task-section-header">
                     <h3 class="section-title">Tarefas Pendentes</h3>
-                    <a href="{{ url_for('parent.new_task_page') }}" class="btn-new-task"><i class="fa-solid fa-plus"></i> Nova Tarefa</a>
+                    <a href="{{ url_for('newtask.new_task_page') }}" class="btn-new-task"><i class="fa-solid fa-plus"></i> Nova Tarefa</a>
                 </div>
 
                 {% if tarefas_pendentes %}
@@ -96,7 +96,7 @@
                 
                 {% if tarefas_para_avaliar %}
                     {% for submissao in tarefas_para_avaliar %}
-                        <a href="{{ url_for('parent.tasks_page', _anchor='submissao-' + submissao.id) }}" 
+                        <a href="{{ url_for('taskssubmission.tasks_page', _anchor='submissao-' + submissao.id) }}" 
                            class="card task-card priority-EVAL">
                             
                             <i class="fa-solid {{ submissao.tarefa.icone or 'fa-list-check' }} task-icon"></i>
@@ -122,22 +122,21 @@
                 {% endif %}
             </section>
 
-            <!-- <a href="{{ url_for('auth.login_page') }}" class="back-link">Sair (Voltar ao Login)</a> --> 
         </main>
 
         <footer class="app-footer-nav">
             <a href="#" class="nav-item active"> <i class="fa-solid fa-house"></i>
                 <span>Início</span>
             </a>
-            <a href="{{ url_for('parent.tasks_page') }}" class="nav-item">
+            <a href="{{ url_for('taskssubmission.tasks_page') }}" class="nav-item">
                 <i class="fa-solid fa-list-check"></i>
                 <span>Tarefas</span>
             </a>
-            <a href="{{ url_for('parent.rewards_page') }}" class="nav-item">
+            <a href="{{ url_for('resgatar.manage_page') }}" class="nav-item">
                 <i class="fa-solid fa-gift"></i>
                 <span>Recompensas</span>
             </a>
-            <a href="{{ url_for('parent.profile_page') }}" class="nav-item">
+            <a href="{{ url_for('carteira.profile_page') }}" class="nav-item">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>

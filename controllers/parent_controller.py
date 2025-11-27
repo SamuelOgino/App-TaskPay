@@ -567,10 +567,7 @@ def edit_profile_submit():
     # 5. Redireciona de volta para a página de perfil
     return redirect(url_for("parent.profile_page"))
 
-# ... (fim da sua rota @bp.post("/profile/edit") ) ...
 
-
-# --- ADICIONE ESTA NOVA ROTA ---
 @bp.get("/tasks")
 def tasks_page():
     """Exibe a página de 'Tarefas' do PAI (Pendentes e Para Avaliar)."""

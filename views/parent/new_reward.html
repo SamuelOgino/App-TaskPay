@@ -14,7 +14,7 @@
 <body>
   <div class="phone">
     <header class="app-header">
-      <a href="{{ url_for('parent.rewards_page') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
+      <a href="{{ url_for('resgatar.manage_page') }}" style="color:#fff"><i class="fa-solid fa-arrow-left"></i></a>
       <div class="logo"><i class="fa-solid fa-list"></i><span>TaskPay</span></div>
       <!-- <i class="fa-solid fa-user"></i> -->
     </header>
@@ -23,7 +23,7 @@
       {{ flash_messages() }}
       <h2 style="font-weight:800;font-size:1.4rem;margin-bottom:12px">Nova Recompensa</h2>
 
-      <form method="post" action="{{ url_for('parent.create_reward') }}">
+      <form method="post" action="{{ url_for('criarrecompensa.create_reward') }}">
         <div class="card">
           <label>Título</label>
           <input class="input" type="text" name="titulo" placeholder="Ex.: 1h de videogame" required>
