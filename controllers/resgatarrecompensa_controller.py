@@ -146,7 +146,7 @@ def manage_page():
     
     limite_tempo = datetime.utcnow() - timedelta(hours=36)
     historico = (ResgateRecompensa.query
-        .join(Membro,ResgateRecompensa.membro_id == Membro.id).join(Recompensa, ResgateRecompensa.recompensa_id == Recompensa.id)
+        .join(Membro, ResgateRecompensa.membro_id == Membro.id).join(Recompensa,ResgateRecompensa.recompensa_id == Recompensa.id)
         .filter(Membro.familia_id == membro.familia_id)
         .filter(or_(
             ResgateRecompensa.status == ResgateStatus.PENDING,
