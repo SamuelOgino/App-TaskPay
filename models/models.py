@@ -38,7 +38,7 @@ class Usuario(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     nome = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    senhaHash = db.Column(db.String(128), nullable=False)
+    senhaHash = db.Column(db.Text)
     criadoEm = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     avatarUrl = db.Column(db.String(255), nullable=True)  
     
